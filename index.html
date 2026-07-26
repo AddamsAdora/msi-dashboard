@@ -1287,7 +1287,7 @@ Due Jul 31 at 11:59pm | -/24 pts"></textarea>
     <input type="hidden" id="editCourseId">
     <input type="hidden" id="editCourseSemesterId">
     <div class="form-row cols2">
-      <div><label>Course Code</label><input type="text" id="courseCode" placeholder="EME 6920"></div>
+      <div><label>Course Code</label><input type="text" id="courseCode" placeholder="LIS 5271"></div>
       <div><label>Credits</label><input type="number" id="courseCredits" placeholder="3"></div>
     </div>
     <div class="form-row"><div><label>Course Name</label><input type="text" id="courseName" placeholder="Course title"></div></div>
@@ -1402,7 +1402,6 @@ async function launch() {
   document.getElementById('topnav').style.display = 'flex';
   document.getElementById('mainContent').style.display = 'block';
   await loadAll();
-  await syncCourseColors();
   if (!semesters.length) await seedData();
   renderSemesterSwitcher();
   initDark();
@@ -2099,11 +2098,10 @@ function inferReadingDueDate(courseId, weekLabel) {
   const num = parseInt(numMatch[1]);
 
   const courseAssignments = assignments.filter(a => a.course_id === courseId && a.due_date);
-  const c = courseById(courseId);
-  const isWeekBased = c.code && c.code.startsWith('EDG');
+  const isWeekBased = /week/i.test(weekLabel);
 
-  // For EDG (week-based): match assignments whose name contains "Week N" or "Week N Discussion"
-  // For EDF (module-based): match assignments whose name contains "Module N"
+  // Match assignments whose name contains "Week N" or "Module N", matching
+  // whichever term actually appears in this reading's own week/module label
   const keyword = isWeekBased ? `Week ${num}` : `Module ${num}`;
 
   const matches = courseAssignments.filter(a =>
@@ -2590,9 +2588,7 @@ function setNoteFilter(f) { currentNoteFilter = f === 'All' ? 'all' : f; renderN
 function getModulesForCourse(courseId) {
   const c = courseById(courseId);
   if (!c || !c.code) return [];
-  if (c.code.startsWith('EDF')) return ['Module 1','Module 2','Module 3','Module 4','Module 5','Module 6','Module 7','Module 8','Module 9'];
-  if (c.code.startsWith('EDG')) return ['Week 1','Week 2','Week 3','Week 4','Week 5','Week 6','Week 7','Week 8','Week 9','Week 10'];
-  if (c.code.startsWith('EME')) return ['Unit 1','Unit 2','Unit 3','Unit 4','Unit 5'];
+  if (c.code.startsWith('LIS')) return ['Unit 1','Unit 2','Unit 3','Unit 4','Unit 5'];
   return ['Week 1','Week 2','Week 3','Week 4','Week 5','Week 6','Week 7','Week 8'];
 }
 function populateNoteModules(courseId, currentVal) {
@@ -3742,18 +3738,6 @@ async function confirmAssignImport() {
   if (currentPage === 'today') renderToday();
   if (currentPage === 'dashboard') renderDashboard();
   showToast(`Added ${added} new assignment${added !== 1 ? 's' : ''}!`);
-}
-
-// ── SYNC COURSE COLORS ───────────────────────────────
-async function syncCourseColors() {
-  const colorMap = { 'EDF 5492': 'garnet', 'EDG 6362': 'gold', 'EME 6920': 'blue' };
-  for (const c of courses) {
-    const expected = colorMap[c.code];
-    if (expected && c.color !== expected) {
-      await sbPatch('courses', c.id, { color: expected });
-      c.color = expected;
-    }
-  }
 }
 
 // ── STARTUP ──────────────────────────────────────
