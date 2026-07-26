@@ -1,0 +1,3769 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FSU · MSI Dashboard</title>
+<link rel="icon" type="image/x-icon" href="favicon.ico">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="android-chrome-192x192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="android-chrome-512x512.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,300;0,400;0,600;0,700;0,800;1,400;1,700&family=Barlow:ital,wght@0,300;0,400;0,500;0,600;1,400&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,300;0,400;0,600;0,700;0,800;1,400;1,700&family=Barlow:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap');
+
+:root {
+  /* FSU official brand colors — brand.fsu.edu/visual-style
+     Garnet and Gold are fixed brand colors and do not change between
+     light/dark mode. Garnet is never lightened; Gold is never darkened.
+     Day vs. night is expressed through which one dominates the chrome
+     (nav/hero/surfaces), not by altering the swatches themselves. */
+  --pink:       #782F40;   /* FSU Garnet */
+  --pink-dim:   #572932;   /* FSU Plaza Brick — official Garnet-family secondary */
+  --pink-glow:  rgba(120,47,64,0.22);
+  --teal:       #425563;   /* FSU Legacy Blue — official accent color (3rd course) */
+  --teal-dim:   #2e3943;
+  --teal-glow:  rgba(66,85,99,0.18);
+  --gold:       #CEB888;   /* FSU Gold */
+  --sands:      #DFD1A7;   /* FSU Gulf Sands — official Gold-family secondary */
+  --stadium:    #101820;   /* FSU Stadium Night — official black */
+  --surface:    #100a0c;
+  --surface2:   #1a1114;
+  --surface3:   #241a1d;
+  --border:     rgba(255,255,255,0.14);
+  --border2:    rgba(255,255,255,0.24);
+  --text:       #f0eaf4;
+  --text2:      rgba(240,234,244,0.65);
+  --text3:      rgba(240,234,244,0.38);
+  --radius-sm:  6px;
+  --radius-md:  10px;
+  --radius-lg:  16px;
+  --nav-h:      58px;
+  --app-font:   'Barlow', sans-serif;
+  --app-zoom:   1;
+}
+
+/* light mode (day view) — FSU Gold dominates the chrome/surfaces;
+   Garnet remains the text/link accent since Garnet-on-white passes
+   FSU's own accessibility chart (Gold text does not, so we never use
+   gold as a text color — only as a background). */
+[data-theme="light"] {
+  --surface:    rgba(87,41,50,0.07);
+  --surface2:   rgba(87,41,50,0.1);
+  --surface3:   rgba(87,41,50,0.15);
+  --border:     rgba(87,41,50,0.18);
+  --border2:    rgba(87,41,50,0.3);
+  --text:       #241016;
+  --text2:      rgba(36,16,22,0.68);
+  --text3:      rgba(36,16,22,0.44);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: var(--app-font, 'Barlow', sans-serif);
+  background: #1a0b0e;
+  color: var(--text);
+  min-height: 100vh;
+  font-size: 16px;
+  line-height: 1.6;
+  zoom: var(--app-zoom, 1);
+}
+
+/* mesh gradient background */
+body::before {
+  content: '';
+  position: fixed; inset: 0; z-index: -1; pointer-events: none;
+  background:
+    radial-gradient(ellipse 80% 60% at 0% 0%,   rgba(120,47,64,0.65) 0%, transparent 55%),
+    radial-gradient(ellipse 70% 50% at 100% 0%,  rgba(87,41,50,0.5)  0%, transparent 50%),
+    radial-gradient(ellipse 60% 50% at 100% 100%,rgba(206,184,136,0.14) 0%, transparent 55%),
+    radial-gradient(ellipse 50% 40% at 0% 100%,  rgba(16,10,12,0.7)   0%, transparent 50%),
+    #1a0b0e;
+}
+
+[data-theme="light"] body::before {
+  background:
+    radial-gradient(ellipse 80% 60% at 0% 0%,   rgba(206,184,136,0.42) 0%, transparent 55%),
+    radial-gradient(ellipse 70% 50% at 100% 0%,  rgba(223,209,167,0.5) 0%, transparent 50%),
+    radial-gradient(ellipse 60% 50% at 100% 100%,rgba(120,47,64,0.10) 0%, transparent 55%),
+    radial-gradient(ellipse 50% 40% at 0% 100%,  rgba(206,184,136,0.22) 0%, transparent 50%),
+    #fbf7ef;
+}
+
+[data-theme="light"] body { background: #fbf7ef; }
+
+/* ── TOP NAV ── */
+.topnav {
+  position: fixed; top: 0; left: 0; right: 0; height: var(--nav-h);
+  background: linear-gradient(90deg, #12070a 0%, #3a1620 60%, #572932 100%);
+  display: flex; align-items: center; padding: 0 20px;
+  z-index: 200; gap: 8px;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+.topnav-brand { display: flex; align-items: center; gap: 10px; text-decoration: none; flex-shrink: 0; }
+.topnav-logo {
+  width: 30px; height: 30px;
+  background: linear-gradient(135deg, #782F40, #CEB888);
+  border-radius: 7px;
+  display: flex; align-items: center; justify-content: center;
+}
+.topnav-logo i { font-size: 16px; color: #fff; }
+.topnav-title {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 17px; font-weight: 700; color: var(--text);
+  letter-spacing: .5px; text-transform: uppercase;
+}
+.topnav-title span { color: var(--gold); }
+.topnav-links { display: flex; align-items: center; gap: 1px; margin-left: 20px; flex: 1; }
+.topnav-links a {
+  padding: 5px 11px; border-radius: var(--radius-sm);
+  color: rgba(255,255,255,0.6); text-decoration: none;
+  font-size: 13px; font-weight: 500;
+  display: flex; align-items: center; gap: 5px;
+  transition: background .12s, color .12s; white-space: nowrap;
+}
+.topnav-links a:hover { background: rgba(255,255,255,0.08); color: #fff; }
+.topnav-links a.active { background: rgba(206,184,136,0.18); color: var(--gold); }
+.topnav-links a i { font-size: 15px; }
+.topnav-right { display: flex; align-items: center; gap: 8px; margin-left: auto; }
+.dark-btn {
+  width: 34px; height: 34px; border-radius: var(--radius-sm); border: 1px solid var(--border);
+  cursor: pointer; background: var(--surface); color: var(--text2);
+  display: flex; align-items: center; justify-content: center; font-size: 17px;
+  transition: background .12s;
+}
+.dark-btn:hover { background: var(--surface2); color: var(--text); }
+.hamburger {
+  display: none; width: 34px; height: 34px; border-radius: var(--radius-sm);
+  border: 1px solid var(--border); cursor: pointer;
+  background: var(--surface); color: var(--text2);
+  align-items: center; justify-content: center; font-size: 19px;
+}
+
+/* ── DRAWER ── */
+.drawer-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 300; }
+.drawer-overlay.open { display: block; }
+.drawer {
+  position: fixed; top: 0; left: -280px; bottom: 0; width: 260px;
+  background: linear-gradient(180deg, #12070a 0%, #572932 100%); border-right: 1px solid rgba(255,255,255,0.1);
+  z-index: 310; transition: left .25s cubic-bezier(.19,1,.22,1);
+  display: flex; flex-direction: column; padding: 20px 0;
+}
+.drawer.open { left: 0; }
+.drawer-close { margin: 0 16px 16px; align-self: flex-start; width: 34px; height: 34px; border-radius: var(--radius-sm); border: 1px solid var(--border); cursor: pointer; background: var(--surface); color: var(--text2); font-size: 17px; display: flex; align-items: center; justify-content: center; }
+.drawer-links a { display: flex; align-items: center; gap: 10px; padding: 11px 20px; color: rgba(255,255,255,0.6); text-decoration: none; font-size: 14px; font-weight: 500; transition: background .12s; }
+.drawer-links a:hover, .drawer-links a.active { background: var(--surface2); color: var(--text); }
+.drawer-links a.active { color: var(--gold); }
+.drawer-links a i { font-size: 17px; }
+.drawer-sep { height: 1px; background: var(--border); margin: 10px 20px; }
+.drawer-dark { display: flex; align-items: center; gap: 10px; padding: 11px 20px; color: var(--text2); font-size: 14px; font-weight: 500; }
+.toggle-switch { position: relative; width: 40px; height: 22px; margin-left: auto; }
+.toggle-switch input { opacity: 0; width: 0; height: 0; }
+.toggle-track { position: absolute; inset: 0; border-radius: 11px; background: var(--surface3); cursor: pointer; transition: background .2s; }
+.toggle-track:before { content:''; position: absolute; height: 16px; width: 16px; left: 3px; top: 3px; border-radius: 50%; background: #fff; transition: transform .2s; }
+input:checked + .toggle-track { background: var(--pink); }
+input:checked + .toggle-track:before { transform: translateX(18px); }
+
+/* ── MAIN ── */
+.main { margin-top: var(--nav-h); padding: 28px 32px 100px; width: 100%; }
+
+/* ── PAGES ── */
+.page { display: none; }
+.page.active { display: block; }
+
+/* ── PAGE HEADER ── */
+.page-header { margin-bottom: 24px; }
+.page-header h1 {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 32px; font-weight: 700; color: var(--text);
+  text-transform: uppercase; letter-spacing: .5px;
+}
+.page-header p { color: var(--text3); font-size: 13px; margin-top: 2px; }
+
+/* ── CARDS ── */
+.card {
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+  padding: 20px;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 4px 18px rgba(0,0,0,0.28);
+}
+.card + .card { margin-top: 16px; }
+
+/* ── STAT GRID ── */
+.stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 22px; }
+.stat-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 18px 20px;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 4px 18px rgba(0,0,0,0.28);
+}
+.stat-card::before { display: none; }
+.stat-num {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 36px; font-weight: 800; color: var(--text); line-height: 1;
+}
+.stat-label { font-size: 12px; color: var(--text3); font-weight: 500; margin-top: 4px; text-transform: uppercase; letter-spacing: .5px; }
+
+/* ── COURSE GRID ── */
+.course-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 22px; }
+.course-card {
+  border-radius: var(--radius-lg); padding: 22px;
+  color: #fff; position: relative; overflow: hidden;
+  border: 1px solid rgba(255,255,255,0.12);
+}
+/* orb */
+.course-card::after {
+  content: ''; position: absolute;
+  bottom: -40px; right: -40px;
+  width: 150px; height: 150px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 70%);
+}
+.course-card.c-garnet { background: linear-gradient(135deg, #2b1119 0%, #572932 55%, #782F40 100%); }
+.course-card.c-gold   { background: linear-gradient(135deg, #14100a 0%, #8e7a45 55%, #CEB888 100%); }
+.course-card.c-blue   { background: linear-gradient(135deg, #1c2830 0%, #314a56 55%, #5f7d89 100%); }
+.course-code { font-size: 10px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; color: rgba(255,255,255,0.55); }
+.course-name { font-family: 'Barlow Condensed', sans-serif; font-size: 16px; font-weight: 700; color: #ffffff; margin: 6px 0 14px; line-height: 1.25; text-transform: uppercase; letter-spacing: .3px; }
+.course-meta { font-size: 12px; color: rgba(255,255,255,0.75); display: flex; flex-direction: column; gap: 4px; }
+.course-meta i { font-size: 12px; vertical-align: middle; margin-right: 5px; opacity: .7; }
+.course-meta a { color: rgba(255,255,255,0.75); text-decoration: underline; text-decoration-color: rgba(255,255,255,0.3); }
+.course-meta a:hover { color: #fff; }
+.course-progress { margin-top: 14px; }
+.course-progress-bar { height: 3px; background: rgba(255,255,255,0.15); border-radius: 2px; overflow: hidden; margin-top: 4px; }
+.course-progress-fill { height: 100%; background: rgba(255,255,255,0.75); border-radius: 2px; transition: width .4s; }
+
+/* ── LAYOUT ── */
+.two-col   { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+
+/* ── SECTION TITLE ── */
+.section-title {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 15px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 1px; color: rgba(255,255,255,0.55);
+  margin-bottom: 12px; display: flex; align-items: center; gap: 8px;
+}
+.section-title i { font-size: 16px; }
+
+/* ── DEADLINE LIST ── */
+.deadline-item { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--border); }
+.deadline-item:last-child { border-bottom: none; }
+.dl-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+.dl-dot.soon    { background: var(--gold); }
+.dl-dot.overdue { background: var(--pink); }
+.dl-dot.ok      { background: var(--teal); }
+.dl-name { flex: 1; font-size: 13px; color: var(--text); font-weight: 500; }
+.dl-meta { font-size: 11px; color: var(--text3); }
+.dl-course-tag { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 4px; background: var(--surface2); color: var(--text2); margin-left: 6px; }
+
+
+/* ── TAGS ── */
+.tag { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: .4px; width: fit-content; flex-shrink: 0; }
+.tag-garnet { background: rgba(120,47,64,0.22);   color: #d9a1ad;      border: 1px solid rgba(120,47,64,0.65); }
+.tag-gold   { background: rgba(206,184,136,0.22); color: #e8d9b4;      border: 1px solid rgba(206,184,136,0.65); }
+.tag-blue   { background: rgba(66,85,99,0.24);    color: #a9c1ca;      border: 1px solid rgba(66,85,99,0.6); }
+.tag-green  { background: rgba(34,197,94,0.12);  color: #4ade80;      border: 1px solid rgba(34,197,94,0.25); }
+.tag-gray   { background: var(--surface2);       color: var(--text3); border: 1px solid var(--border); }
+
+/* ── FILTER BAR ── */
+.filter-bar { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 18px; }
+.filter-btn {
+  padding: 5px 14px; border-radius: 20px; border: 1px solid var(--border);
+  background: var(--surface); color: var(--text2);
+  font-size: 12px; font-weight: 600; cursor: pointer;
+  transition: all .12s; font-family: var(--app-font); text-transform: uppercase; letter-spacing: .4px;
+}
+.filter-btn:hover { border-color: var(--pink); color: var(--pink); }
+.filter-btn.active { background: #101820; border-color: #5CB8B2; color: #5CB8B2; }
+.filter-btn.fb-garnet { border-color: rgba(120,47,64,0.55); color: #b5828d; }
+.filter-btn.fb-garnet:hover,
+.filter-btn.fb-garnet.active { background: rgba(120,47,64,0.22); border-color: #782F40; color: #e3aab5; }
+.filter-btn.fb-gold { border-color: rgba(206,184,136,0.55); color: #CEB888; }
+.filter-btn.fb-gold:hover,
+.filter-btn.fb-gold.active { background: rgba(206,184,136,0.24); border-color: #CEB888; color: #f0e2c4; }
+.filter-btn.fb-blue { border-color: rgba(66,85,99,0.7); color: #93aab8; }
+.filter-btn.fb-blue:hover,
+.filter-btn.fb-blue.active { background: rgba(66,85,99,0.28); border-color: #6c8194; color: #c2d2db; }
+[data-theme="light"] .filter-btn.active { background: #DFD1A7; border-color: #572932; color: #572932; }
+[data-theme="light"] .filter-btn.fb-garnet { color: #782F40; }
+[data-theme="light"] .filter-btn.fb-garnet:hover,
+[data-theme="light"] .filter-btn.fb-garnet.active { color: #572932; }
+[data-theme="light"] .filter-btn.fb-gold { color: #8a6a1e; border-color: rgba(184,135,46,0.6); }
+[data-theme="light"] .filter-btn.fb-gold:hover,
+[data-theme="light"] .filter-btn.fb-gold.active { color: #6b4e12; background: rgba(184,135,46,0.22); }
+[data-theme="light"] .filter-btn.fb-blue { color: #425563; }
+[data-theme="light"] .filter-btn.fb-blue:hover,
+[data-theme="light"] .filter-btn.fb-blue.active { color: #2e3943; }
+
+/* ── BUTTONS ── */
+.btn { display: inline-flex; align-items: center; gap: 6px; padding: 7px 16px; border-radius: var(--radius-sm); border: none; cursor: pointer; font-family: var(--app-font); font-size: 13px; font-weight: 600; transition: all .12s; text-transform: uppercase; letter-spacing: .3px; }
+.btn-primary { background: var(--pink); color: #fff; }
+.btn-primary:hover { background: var(--pink-dim); }
+.btn-secondary { background: var(--surface); color: var(--text); border: 1px solid var(--border); }
+.btn-secondary:hover { border-color: var(--pink); color: var(--pink); }
+.btn-gold { background: var(--gold); color: #1a0820; }
+.btn-gold:hover { background: #dcc79c; }
+.btn-sm { padding: 4px 10px; font-size: 11px; }
+.btn-icon { padding: 6px; }
+
+/* ── FORM ELEMENTS ── */
+input, textarea, select {
+  font-family: var(--app-font); font-size: 13px;
+  background: var(--surface); color: var(--text);
+  border: 1px solid var(--border); border-radius: var(--radius-sm);
+  padding: 8px 12px; width: 100%;
+  transition: border-color .12s;
+}
+input:focus, textarea:focus, select:focus { outline: none; border-color: var(--pink); }
+option { background: #180b0f; }
+.form-row { display: grid; gap: 12px; margin-bottom: 12px; }
+.form-row.cols2 { grid-template-columns: 1fr 1fr; }
+.form-row.cols3 { grid-template-columns: 1fr 1fr 1fr; }
+label { font-size: 11px; font-weight: 700; color: var(--text3); display: block; margin-bottom: 4px; text-transform: uppercase; letter-spacing: .5px; }
+
+/* ── MODAL ── */
+.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); z-index: 400; align-items: center; justify-content: center; padding: 20px; }
+.modal-overlay.open { display: flex; }
+.modal { background: #180b0f; border: 1px solid var(--border2); border-radius: var(--radius-lg); padding: 28px; width: 100%; max-width: 520px; max-height: 90vh; overflow-y: auto; }
+.modal h2 { font-family: 'Barlow Condensed', sans-serif; font-size: 22px; font-weight: 700; margin-bottom: 20px; text-transform: uppercase; letter-spacing: .5px; }
+.modal-footer { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
+
+/* ── PROGRESS BARS ── */
+.progress-bar { height: 4px; background: var(--surface3); border-radius: 2px; overflow: hidden; }
+.progress-fill { height: 100%; background: linear-gradient(90deg, var(--pink), var(--teal)); border-radius: 2px; transition: width .4s; }
+
+/* ── WEEK CARD ── */
+.week-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 16px; backdrop-filter: blur(8px); }
+.week-card.current-week { border-color: var(--pink); box-shadow: 0 0 0 1px var(--pink-glow); }
+.week-num { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--text3); }
+.week-label { font-family: 'Barlow Condensed', sans-serif; font-size: 16px; font-weight: 700; color: var(--text); margin: 2px 0 6px; text-transform: uppercase; }
+.week-dates { font-size: 11px; color: var(--text3); margin-bottom: 10px; }
+.week-mins { font-size: 12px; font-weight: 600; color: var(--pink); margin-bottom: 8px; }
+.week-deadlines { font-size: 12px; color: var(--text2); }
+.week-dl-item { display: flex; align-items: flex-start; gap: 6px; padding: 3px 0; }
+.week-dl-item i { font-size: 13px; color: var(--teal); flex-shrink: 0; margin-top: 1px; }
+
+/* ── TODAY HERO ── */
+.today-hero {
+  background: linear-gradient(135deg, #2b1119 0%, #572932 40%, #782F40 75%, #8a3d51 100%);
+  border-radius: var(--radius-lg); padding: 26px; color: #fff; margin-bottom: 18px;
+  position: relative; overflow: hidden;
+  border: 1px solid rgba(255,255,255,0.1);
+}
+.today-hero::before { display: none; }
+.today-hero h2 { font-family: 'Barlow Condensed', sans-serif; font-size: 28px; font-weight: 800; margin-bottom: 4px; text-transform: uppercase; letter-spacing: .5px; color: #fff; }
+.today-hero p { font-size: 13px; opacity: .7; }
+
+/* ── FOCUS ITEMS ── */
+.focus-item {
+  display: flex; align-items: center; gap: 14px; padding: 14px 16px;
+  background: var(--surface); border-radius: var(--radius-md);
+  margin-bottom: 8px; border: 1px solid var(--border);
+  backdrop-filter: blur(8px); transition: border-color .12s;
+}
+.focus-item:hover { border-color: var(--border2); }
+.focus-icon { width: 32px; height: 32px; border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.focus-icon i { font-size: 16px; }
+.focus-icon.red    { background: rgba(239,68,68,0.2);  color: #f87171; }
+.focus-icon.amber  { background: rgba(245,158,11,0.2); color: var(--gold); }
+.focus-icon.blue   { background: rgba(0,201,167,0.15); color: var(--teal); }
+.focus-icon.green  { background: rgba(34,197,94,0.15); color: #4ade80; }
+.focus-icon.purple { background: rgba(255,45,120,0.15);color: var(--pink); }
+.focus-content strong { font-size: 14px; font-weight: 600; color: #ffffff; display: block; }
+.focus-content span { font-size: 12px; color: rgba(255,255,255,0.45); margin-top: 4px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+
+/* ── DISCUSSION ── */
+.disc-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 14px; }
+.disc-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 16px; backdrop-filter: blur(8px); }
+.disc-week-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.disc-week-label { font-family: 'Barlow Condensed', sans-serif; font-size: 15px; font-weight: 700; color: var(--text); text-transform: uppercase; }
+.disc-deadline { font-size: 11px; color: var(--text3); }
+.disc-dots { display: flex; gap: 6px; margin-bottom: 10px; flex-wrap: wrap; }
+.disc-dot-btn { width: 28px; height: 28px; border-radius: 50%; border: 1px solid var(--border); background: var(--surface); cursor: pointer; font-size: 11px; font-weight: 700; color: var(--text3); display: flex; align-items: center; justify-content: center; transition: all .12s; }
+.disc-dot-btn.filled { background: var(--pink); border-color: var(--pink); color: #fff; }
+.disc-status { font-size: 12px; font-weight: 600; }
+.disc-status.good { color: var(--teal); }
+.disc-status.warn { color: var(--gold); }
+.disc-status.miss { color: var(--pink); }
+
+/* ── NOTES ── */
+.notes-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; }
+.note-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 16px; cursor: pointer; transition: border-color .12s; backdrop-filter: blur(8px); position: relative; }
+.note-card:hover { border-color: var(--border2); }
+.note-card.note-garnet { border-left: 3px solid #782F40; }
+.note-card.note-gold   { border-left: 3px solid #CEB888; }
+.note-card.note-blue   { border-left: 3px solid #425563; }
+.note-title { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+.note-body { font-size: 12px; color: var(--text2); margin-bottom: 10px; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.note-footer { display: flex; gap: 4px; flex-wrap: wrap; align-items: center; }
+.note-date { font-size: 11px; color: var(--text3); margin-left: auto; }
+
+
+/* ── READING ROW ── */
+.reading-row { display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px; border-bottom: 1px solid var(--border); border-radius: 6px; transition: background .1s; }
+.reading-row:last-child { border-bottom: none; }
+.reading-row:hover { background: #572932; }
+.reading-row:hover .reading-title { color: #DFD1A7; }
+.reading-row:hover .reading-citation { color: rgba(223,209,167,0.75); }
+[data-theme="light"] .reading-row:hover { background: rgba(206,184,136,0.4); }
+[data-theme="light"] .reading-row:hover .reading-title { color: #241016; }
+[data-theme="light"] .reading-row:hover .reading-citation { color: rgba(36,16,22,0.68); }
+.reading-text { flex: 1; }
+.reading-title { font-size: 13px; font-weight: 500; color: #ffffff; }
+.reading-citation { font-size: 11px; color: var(--text3); margin-top: 2px; }
+
+/* ── CONNECTIONS ── */
+.conn-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 16px; margin-bottom: 12px; backdrop-filter: blur(8px); }
+.conn-title { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 6px; display: flex; align-items: center; gap: 8px; }
+.conn-courses { display: flex; gap: 6px; margin-bottom: 8px; flex-wrap: wrap; }
+.conn-desc { font-size: 13px; color: var(--text2); }
+
+/* ── APA BUILDER ── */
+.apa-output { background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 16px; font-size: 13px; color: var(--text); line-height: 1.8; min-height: 60px; word-break: break-word; padding-left: calc(16px + 0.5in); text-indent: -0.5in; }
+
+/* ── GRADE TABLE ── */
+.grade-input { width: 80px; padding: 4px 8px; font-size: 13px; text-align: center; }
+.grade-avg { font-family: 'Barlow Condensed', sans-serif; font-size: 22px; font-weight: 700; color: var(--pink); }
+
+/* ── CHECK CIRCLE ── */
+.check-circle { width: 20px; height: 20px; border-radius: 50%; border: 1px solid var(--border); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all .12s; flex-shrink: 0; background: transparent; }
+.check-circle:hover { border-color: var(--pink); }
+.check-circle.done { background: var(--pink); border-color: var(--pink); }
+.check-circle.done.cc-garnet { background: #782F40;  border-color: #782F40;  }
+.check-circle.done.cc-gold   { background: #CEB888;  border-color: #CEB888;  }
+.check-circle.done.cc-blue   { background: #425563;  border-color: #425563;  }
+.check-circle.done::after { content: ''; width: 5px; height: 9px; border: 2px solid #fff; border-top: none; border-left: none; transform: rotate(45deg) translate(-1px,-1px); display: block; }
+
+/* ── TABLES ── */
+.tbl { width: 100%; border-collapse: collapse; }
+.tbl th { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .8px; color: var(--text3); padding: 8px 12px; text-align: left; border-bottom: 1px solid var(--border); }
+.tbl td { padding: 10px 12px; border-bottom: 1px solid var(--border); font-size: 13px; vertical-align: middle; }
+.tbl tr:last-child td { border-bottom: none; }
+.tbl tr:hover td { background: #572932; color: #DFD1A7; }
+[data-theme="light"] .tbl tr:hover td { background: rgba(206,184,136,0.4); color: #241016; }
+
+.drag-handle { cursor: grab; color: var(--text3); font-size: 15px; touch-action: none; }
+.drag-handle:active { cursor: grabbing; }
+.dragging { opacity: 0.4; }
+
+/* ── DUE TODAY HIGHLIGHT ── */
+.due-today { border-left: 4px solid #CEB888 !important; background: rgba(206,184,136,0.1) !important; padding-left: 10px !important; }
+[data-theme="light"] .due-today { border-left-color: #782F40 !important; background: rgba(120,47,64,0.08) !important; }
+.tbl tr.due-today td:first-child { border-left: 4px solid #CEB888; }
+[data-theme="light"] .tbl tr.due-today td:first-child { border-left-color: #782F40; }
+.completed-row td { opacity: .45; }
+.completed-row td .dl-name { text-decoration: line-through; }
+
+/* ── TOAST ── */
+.toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  background: #1b1115;
+  border: 1px solid var(--border2);
+  color: #f0eaf4;
+  padding: 10px 18px;
+  border-radius: var(--radius-md);
+  font-size: 13px;
+  font-weight: 600;
+  opacity: 0;
+  transform: translateY(12px);
+  transition: all .2s;
+  z-index: 500;
+  pointer-events: none;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.28);
+}
+.toast.show { opacity: 1; transform: translateY(0); }
+
+[data-theme="light"] .toast {
+  background: linear-gradient(135deg, #572932, #782F40);
+  border-color: rgba(87,41,50,0.22);
+  color: #ffffff;
+  box-shadow: 0 10px 28px rgba(87,41,50,0.28);
+}
+
+/* ── CALLOUT ── */
+.callout { background: rgba(255,45,120,0.08); border-left: 3px solid var(--pink); border-radius: 0 var(--radius-sm) var(--radius-sm) 0; padding: 12px 16px; font-size: 13px; color: var(--text); margin-bottom: 16px; }
+
+/* ── EXPORT ── */
+.export-section { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 24px; }
+.export-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin: 20px 0; }
+.export-stat { text-align: center; }
+.export-stat-num { font-family: 'Barlow Condensed', sans-serif; font-size: 36px; font-weight: 700; color: var(--pink); }
+.export-stat-label { font-size: 12px; color: var(--text3); text-transform: uppercase; letter-spacing: .5px; }
+
+/* ── SETUP SCREEN ── */
+.setup-screen { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
+.setup-card { background: rgba(255,255,255,0.05); border: 1px solid var(--border2); backdrop-filter: blur(16px); border-radius: var(--radius-lg); padding: 40px; max-width: 440px; width: 100%; text-align: center; }
+.setup-card h1 { font-family: 'Barlow Condensed', sans-serif; font-size: 28px; font-weight: 700; margin-bottom: 6px; text-transform: uppercase; letter-spacing: .5px; }
+.setup-card p { color: var(--text2); font-size: 13px; margin-bottom: 28px; }
+.setup-field { text-align: left; margin-bottom: 14px; }
+
+
+/* ── LIGHT MODE (DAY VIEW): FSU Gold dominates nav/hero/surfaces.
+   Per FSU's own accessibility chart, Gold text fails on every background,
+   so gold is used here only as a background — text stays dark or, for
+   large headings, Garnet. ── */
+[data-theme="light"] .topnav {
+  background: linear-gradient(90deg, #CEB888 0%, #DFD1A7 60%, #f2ead9 100%);
+  border-bottom-color: rgba(87,41,50,0.16);
+}
+[data-theme="light"] .drawer {
+  background: linear-gradient(180deg, #CEB888 0%, #DFD1A7 100%);
+  border-right-color: rgba(87,41,50,0.18);
+}
+[data-theme="light"] .drawer-links a,
+[data-theme="light"] .drawer-dark { color: rgba(36,16,22,0.78); }
+[data-theme="light"] .drawer-links a:hover,
+[data-theme="light"] .drawer-links a.active { background: rgba(120,47,64,0.85); color: #fff; }
+[data-theme="light"] .topnav-title { color: #241016; }
+[data-theme="light"] .topnav-links a:hover { color: #241016; background: rgba(87,41,50,0.1); }
+[data-theme="light"] .topnav-title span { color: #572932; }
+[data-theme="light"] .topnav-links a { color: rgba(36,16,22,0.7); }
+[data-theme="light"] .topnav-links a.active { background: rgba(120,47,64,0.85); color: #fff; }
+[data-theme="light"] .dark-btn,
+[data-theme="light"] .hamburger {
+  background: rgba(87,41,50,0.1);
+  border-color: rgba(87,41,50,0.2);
+  color: #241016;
+}
+[data-theme="light"] .dark-btn:hover,
+[data-theme="light"] .hamburger:hover { color: #241016; background: rgba(87,41,50,0.18); }
+[data-theme="light"] .today-hero {
+  background: linear-gradient(135deg, #8a6a1e 0%, #CEB888 45%, #DFD1A7 100%);
+  color: #241016;
+  box-shadow: 0 16px 40px rgba(184,135,46,0.22);
+}
+[data-theme="light"] .today-hero h2 { color: #241016; }
+[data-theme="light"] .today-hero p { color: rgba(36,16,22,0.7); opacity: 1; }
+[data-theme="light"] .card,
+[data-theme="light"] .focus-item,
+[data-theme="light"] .week-card,
+[data-theme="light"] .disc-card,
+[data-theme="light"] .note-card,
+[data-theme="light"] .conn-card,
+[data-theme="light"] .stat-card,
+[data-theme="light"] .setup-card,
+[data-theme="light"] .modal {
+  background: rgba(255,255,255,0.85);
+  border-color: rgba(87,41,50,0.14);
+  box-shadow: 0 8px 28px rgba(184,135,46,0.10);
+}
+[data-theme="light"] .modal { background: #fffdf8; }
+[data-theme="light"] input,
+[data-theme="light"] textarea,
+[data-theme="light"] select {
+  background: rgba(255,255,255,0.92);
+  color: var(--text);
+  border-color: rgba(87,41,50,0.2);
+}
+[data-theme="light"] option { background: #fffdf8; color: var(--text); }
+[data-theme="light"] .section-title { color: rgba(36,16,22,0.55); }
+[data-theme="light"] .focus-content strong,
+[data-theme="light"] .reading-title { color: var(--text); }
+[data-theme="light"] .focus-content span { color: var(--text2); }
+[data-theme="light"] .course-card.c-garnet { background: linear-gradient(135deg, #572932 0%, #782F40 60%, #8a3d51 100%); }
+[data-theme="light"] .course-card.c-gold   { background: linear-gradient(135deg, #6b4e12 0%, #a9822c 55%, #CEB888 100%); }
+[data-theme="light"] .course-card.c-blue   { background: linear-gradient(135deg, #2e3943 0%, #425563 55%, #6c8194 100%); }
+[data-theme="light"] .tag-garnet { background: rgba(120,47,64,0.12); color: #572932; border-color: rgba(120,47,64,0.4); }
+[data-theme="light"] .tag-gold { background: rgba(184,135,46,0.2); color: #6b4e12; border-color: rgba(184,135,46,0.48); }
+[data-theme="light"] .tag-blue { background: rgba(66,85,99,0.14); color: #2e3943; border-color: rgba(66,85,99,0.4); }
+[data-theme="light"] .tag-gray { background: rgba(87,41,50,0.07); color: rgba(36,16,22,0.6); border-color: rgba(87,41,50,0.14); }
+[data-theme="light"] .float-note,
+[data-theme="light"] #floatNoteBtn {
+  background: linear-gradient(135deg, #782F40, #CEB888) !important;
+  color: #fff !important;
+  box-shadow: 0 8px 24px rgba(120,47,64,0.3) !important;
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 900px) {
+  .topnav-links { display: none; }
+  .hamburger { display: flex; }
+  .stat-grid { grid-template-columns: repeat(2, 1fr); }
+  .course-grid { grid-template-columns: 1fr; }
+  .two-col { grid-template-columns: 1fr; }
+  .three-col { grid-template-columns: 1fr; }
+  .export-grid { grid-template-columns: 1fr 1fr; }
+  .form-row.cols2 { grid-template-columns: 1fr; }
+  .form-row.cols3 { grid-template-columns: 1fr; }
+}
+@media (max-width: 480px) {
+  .main { padding: 16px 14px 60px; }
+  .stat-grid { grid-template-columns: 1fr 1fr; }
+  .tbl .hide-mobile { display: none; }
+  .export-grid { grid-template-columns: 1fr; }
+}
+@media print {
+  .topnav, .filter-bar, .btn, .hamburger, .dark-btn { display: none !important; }
+  .main { margin: 0; padding: 20px; }
+  .page { display: block !important; }
+}
+</style>
+
+</head>
+<body>
+
+<!-- SETUP SCREEN (shown until connected) -->
+<div id="setupScreen" class="setup-screen" style="display:none">
+  <div class="setup-card">
+    <div style="width:52px;height:52px;background:linear-gradient(135deg,#782F40,#CEB888);border-radius:14px;display:flex;align-items:center;justify-content:center;margin:0 auto 16px">
+      <i class="ti ti-school" style="font-size:26px;color:#fff"></i>
+    </div>
+    <h1>FSU MSI Dashboard</h1>
+    <p>Connect your Supabase database to get started. See the README for setup instructions.</p>
+    <div class="setup-field">
+      <label>Supabase Project URL</label>
+      <input type="text" id="sbUrl" placeholder="https://xxxx.supabase.co">
+    </div>
+    <div class="setup-field">
+      <label>Supabase Anon Key</label>
+      <input type="password" id="sbKey" placeholder="eyJhbG...">
+    </div>
+    <button class="btn btn-primary" style="width:100%;justify-content:center;margin-top:8px" onclick="connectSupabase()">
+      <i class="ti ti-plug"></i> Connect &amp; Launch
+    </button>
+    <p style="margin-top:14px;font-size:11px;color:var(--text3)">Credentials are saved in localStorage on this device only.</p>
+  </div>
+</div>
+
+<!-- TOP NAV -->
+<nav class="topnav" id="topnav" style="display:none">
+  <button class="hamburger" id="hamburgerBtn" onclick="openDrawer()"><i class="ti ti-menu-2"></i></button>
+  <a class="topnav-brand" href="#">
+    <div class="topnav-logo"><i class="ti ti-school"></i></div>
+    <span class="topnav-title">FSU <span>MSI</span></span>
+  </a>
+  <div class="topnav-links" id="topnavLinks">
+    <a href="#" onclick="nav('today')" id="nav-today"><i class="ti ti-sun"></i> Today</a>
+    <a href="#" onclick="nav('dashboard')" id="nav-dashboard"><i class="ti ti-dashboard"></i> Overview</a>
+    <a href="#" onclick="nav('assignments')" id="nav-assignments"><i class="ti ti-checkbox"></i> Assignments</a>
+    <a href="#" onclick="nav('grades')" id="nav-grades"><i class="ti ti-chart-bar"></i> Grades</a>
+    <a href="#" onclick="nav('readings')" id="nav-readings"><i class="ti ti-books"></i> Readings</a>
+    <a href="#" onclick="nav('timeline')" id="nav-timeline"><i class="ti ti-calendar"></i> Timeline</a>
+    <a href="#" onclick="nav('notes')" id="nav-notes"><i class="ti ti-notes"></i> Notes</a>
+    <a href="#" onclick="nav('apa')" id="nav-apa"><i class="ti ti-quote"></i> APA</a>
+    <a href="#" onclick="nav('export')" id="nav-export"><i class="ti ti-file-export"></i> Export</a>
+  </div>
+  <div class="topnav-right">
+    <select id="semesterSwitcher" onchange="setViewingSemester(this.value)" title="Switch semester" style="width:auto;padding:6px 10px;font-size:12px;font-weight:600;border-radius:var(--radius-sm)"></select>
+    <button class="dark-btn" onclick="openManageSemesters()" title="Add / edit semesters and courses"><i class="ti ti-settings"></i></button>
+    <button class="dark-btn" onclick="toggleDarkMode()" id="darkBtn" title="Toggle dark mode"><i class="ti ti-moon"></i></button>
+  </div>
+</nav>
+
+<!-- DRAWER -->
+<div class="drawer-overlay" id="drawerOverlay" onclick="closeDrawer()"></div>
+<div class="drawer" id="drawer">
+  <button class="drawer-close" onclick="closeDrawer()"><i class="ti ti-x"></i></button>
+  <div class="drawer-links" id="drawerLinks">
+    <a href="#" onclick="nav('today');closeDrawer()"><i class="ti ti-sun"></i> Today</a>
+    <a href="#" onclick="nav('dashboard');closeDrawer()"><i class="ti ti-dashboard"></i> Overview</a>
+    <a href="#" onclick="nav('assignments');closeDrawer()"><i class="ti ti-checkbox"></i> Assignments</a>
+    <a href="#" onclick="nav('grades');closeDrawer()"><i class="ti ti-chart-bar"></i> Grades</a>
+    <a href="#" onclick="nav('readings');closeDrawer()"><i class="ti ti-books"></i> Readings</a>
+    <a href="#" onclick="nav('timeline');closeDrawer()"><i class="ti ti-calendar"></i> Timeline</a>
+    <a href="#" onclick="nav('notes');closeDrawer()"><i class="ti ti-notes"></i> Notes</a>
+    <a href="#" onclick="nav('apa');closeDrawer()"><i class="ti ti-quote"></i> APA Builder</a>
+    <a href="#" onclick="nav('export');closeDrawer()"><i class="ti ti-file-export"></i> Export</a>
+  </div>
+  <div class="drawer-sep"></div>
+  <div class="drawer-dark">
+    <i class="ti ti-moon" style="font-size:16px;color:rgba(255,255,255,0.6)"></i>
+    <span>Dark mode</span>
+    <label class="toggle-switch">
+      <input type="checkbox" id="darkToggleDrawer" onchange="toggleDarkMode()">
+      <span class="toggle-track"></span>
+    </label>
+  </div>
+  <div class="drawer-sep"></div>
+  <div style="padding:4px 20px 16px">
+    <div style="font-size:11px;font-weight:700;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">Display</div>
+    <div style="margin-bottom:10px">
+      <label style="display:block;font-size:12px;color:rgba(255,255,255,0.6);margin-bottom:4px">Font size</label>
+      <select id="fontSizeSelect" onchange="setFontScale(this.value)" style="width:100%;padding:6px 8px;font-size:12px;border-radius:var(--radius-sm);background:rgba(255,255,255,0.06);color:#fff;border:1px solid rgba(255,255,255,0.14)">
+        <option value="0.9">Small</option>
+        <option value="1">Default</option>
+        <option value="1.15">Large</option>
+        <option value="1.3">Extra Large</option>
+      </select>
+    </div>
+    <div>
+      <label style="display:block;font-size:12px;color:rgba(255,255,255,0.6);margin-bottom:4px">Font face</label>
+      <select id="fontFaceSelect" onchange="setFontFace(this.value)" style="width:100%;padding:6px 8px;font-size:12px;border-radius:var(--radius-sm);background:rgba(255,255,255,0.06);color:#fff;border:1px solid rgba(255,255,255,0.14)">
+        <option value="'Barlow', sans-serif">Barlow (default)</option>
+        <option value="'Atkinson Hyperlegible', sans-serif">Atkinson Hyperlegible</option>
+        <option value="Georgia, 'Times New Roman', serif">Serif (Georgia)</option>
+        <option value="'Courier New', monospace">Monospace</option>
+        <option value="system-ui, -apple-system, sans-serif">System Default</option>
+      </select>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN CONTENT -->
+<div class="main" id="mainContent" style="display:none">
+
+  <!-- TODAY PAGE -->
+  <div class="page" id="page-today">
+
+    <!-- HERO: greeting + next deadline countdown -->
+    <div class="today-hero" style="margin-bottom:18px">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:20px;flex-wrap:wrap">
+        <div>
+          <h2 id="todayGreeting">Good morning!</h2>
+          <p id="todaySubtitle" style="margin-top:2px"></p>
+        </div>
+        <div id="todayCountdown" style="text-align:right;flex-shrink:0"></div>
+      </div>
+    </div>
+
+    <!-- ROW 1: Next up (focus) + Week at a glance -->
+    <div class="two-col" style="margin-bottom:16px">
+      <div>
+        <div class="section-title"><i class="ti ti-crosshair"></i> Next Up</div>
+        <div id="todayNextUp"></div>
+      </div>
+      <div>
+        <div class="section-title"><i class="ti ti-calendar"></i> This Week</div>
+        <div id="todayWeek" class="card" style="padding:14px 18px"></div>
+      </div>
+    </div>
+
+    <!-- ROW 2: Reading queue + daily reflection -->
+    <div class="two-col" style="margin-bottom:16px">
+      <div>
+        <div class="section-title" style="display:flex;align-items:center;justify-content:space-between">
+          <span style="display:flex;align-items:center;gap:8px"><i class="ti ti-books"></i> Reading Queue</span>
+          <span id="todayReadProgress" style="font-size:11px;color:var(--text3);text-transform:none;letter-spacing:0;font-weight:500"></span>
+        </div>
+        <div id="todayReadQueue" class="card" style="padding:8px 0"></div>
+        <div id="todayReadBar" style="margin-top:10px"></div>
+      </div>
+      <div>
+        <div class="section-title"><i class="ti ti-writing"></i> Daily Reflection</div>
+        <div class="card" style="padding:16px">
+          <div id="todayPrompt" style="font-size:13px;color:var(--text2);margin-bottom:12px;line-height:1.6;font-style:italic"></div>
+          <textarea id="todayReflectionText" rows="4" placeholder="Write your answer here — it saves as a research note..." style="resize:vertical;font-size:13px"></textarea>
+          <div style="display:flex;gap:8px;margin-top:10px;align-items:center">
+            <button class="btn btn-primary btn-sm" onclick="saveTodayReflection()"><i class="ti ti-notes"></i> Save to Notes</button>
+            <button class="btn btn-secondary btn-sm" onclick="newTodayPrompt()"><i class="ti ti-refresh"></i> New prompt</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- DASHBOARD / OVERVIEW PAGE -->
+  <div class="page" id="page-dashboard">
+    <div class="page-header">
+      <h1>Overview</h1>
+      <p id="semesterLabel">Summer 2026</p>
+    </div>
+    <div class="stat-grid" id="statGrid"></div>
+    <div class="course-grid" id="courseGrid"></div>
+    <div class="two-col">
+      <div>
+        <div class="section-title"><i class="ti ti-clock"></i> Upcoming Deadlines</div>
+        <div class="card" id="upcomingDeadlines"></div>
+      </div>
+      <div>
+        <div class="section-title" style="display:flex;align-items:center;justify-content:space-between">
+          <span><i class="ti ti-link"></i> Cross-Course Connections</span>
+          <button class="btn btn-secondary btn-sm" onclick="openAddConnection()"><i class="ti ti-plus"></i> Add</button>
+        </div>
+        <div id="connectionsShort"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ASSIGNMENTS PAGE -->
+  <div class="page" id="page-assignments">
+    <div class="page-header" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
+      <div><h1>Assignments</h1><p>Track all coursework across every semester</p></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn btn-gold btn-sm" onclick="openImportAssign()"><i class="ti ti-clipboard-text"></i> Import from Canvas</button>
+        <button class="btn btn-primary btn-sm" onclick="openAddAssignment()"><i class="ti ti-plus"></i> Add Assignment</button>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:2px">
+      <div class="filter-bar" id="assignFilter"></div>
+      <div class="filter-bar" id="assignUnitToggle" style="margin:0">
+        <button class="filter-btn" id="unitBtnPercent" onclick="setAssignUnit('percent')">%</button>
+        <button class="filter-btn" id="unitBtnPoints" onclick="setAssignUnit('points')">Points</button>
+      </div>
+    </div>
+    <div class="card" style="padding:0;overflow:hidden">
+      <table class="tbl" id="assignTable">
+        <thead><tr>
+          <th style="width:20px"></th>
+          <th style="width:36px"></th>
+          <th>Assignment</th>
+          <th class="hide-mobile">Course</th>
+          <th class="hide-mobile">Due</th>
+          <th class="hide-mobile" id="assignWeightHeader">Weight</th>
+          <th style="width:60px"></th>
+        </tr></thead>
+        <tbody id="assignBody"></tbody>
+      </table>
+    </div>
+    <div id="assignCompletedSection" style="display:none;margin-top:24px">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;cursor:pointer" onclick="toggleCompletedVisible()">
+        <div class="section-title" style="margin-bottom:0"><i class="ti ti-circle-check"></i> Completed</div>
+        <span id="assignCompletedCount" class="tag tag-gray" style="font-size:11px"></span>
+        <i class="ti ti-chevron-down" id="assignCompletedChevron" style="font-size:16px;color:var(--text3);margin-left:auto;transition:transform .2s"></i>
+      </div>
+      <div id="assignCompletedWrap">
+        <div class="card" style="padding:0;overflow:hidden">
+          <table class="tbl">
+            <thead><tr>
+              <th style="width:20px"></th>
+              <th style="width:36px"></th>
+              <th>Assignment</th>
+              <th class="hide-mobile">Course</th>
+              <th class="hide-mobile">Due</th>
+              <th class="hide-mobile">Weight</th>
+              <th style="width:60px"></th>
+            </tr></thead>
+            <tbody id="assignCompletedBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- GRADES PAGE -->
+  <div class="page" id="page-grades">
+    <div class="page-header">
+      <div><h1>Grades</h1><p>Enter grades as they're posted to track where you stand</p></div>
+    </div>
+    <div class="filter-bar" id="gradesFilter"></div>
+    <div id="gradesContent"></div>
+  </div>
+
+  <!-- READINGS PAGE -->
+  <div class="page" id="page-readings">
+    <div class="page-header" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
+      <div><h1>Readings</h1><p id="readProgress">Track your reading list</p></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn btn-gold btn-sm" onclick="openImportReadings()"><i class="ti ti-clipboard-text"></i> Import from Canvas</button>
+        <button class="btn btn-primary btn-sm" onclick="openAddReading()"><i class="ti ti-plus"></i> Add Reading</button>
+      </div>
+    </div>
+    <div class="filter-bar" id="readFilter"></div>
+    <div class="card" style="padding:16px" id="readingList"></div>
+  </div>
+
+  <!-- TIMELINE PAGE -->
+  <div class="page" id="page-timeline">
+    <div class="page-header"><h1>Semester Timeline</h1><p>Weekly workload with daily reading estimates</p></div>
+    <div id="timelineGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px"></div>
+  </div>
+
+  <!-- NOTES PAGE -->
+  <div class="page" id="page-notes">
+    <div class="page-header" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
+      <div><h1>Research Notes</h1><p>Your running journal — tagged, searchable, forever</p></div>
+      <button class="btn btn-primary btn-sm" onclick="openAddNote()"><i class="ti ti-plus"></i> New Note</button>
+    </div>
+    <div class="filter-bar" id="noteFilter"></div>
+    <div style="margin-bottom:14px">
+      <input type="text" id="noteSearch" placeholder="Search notes…" oninput="renderNotes()" style="max-width:320px">
+    </div>
+    <div class="notes-grid" id="notesGrid"></div>
+  </div>
+
+  <!-- APA BUILDER PAGE -->
+  <div class="page" id="page-apa">
+    <div class="page-header"><h1>APA Reference Builder</h1><p>7th edition — build a citation by filling in the fields</p></div>
+    <div class="two-col">
+      <div class="card">
+        <div class="section-title"><i class="ti ti-forms"></i> Reference Details</div>
+        <div class="form-row">
+          <div>
+            <label>Reference Type</label>
+            <select id="apaType" onchange="buildApa()">
+              <option value="journal">Journal Article</option>
+              <option value="book">Book</option>
+              <option value="chapter">Book Chapter</option>
+              <option value="website">Website / Web Document</option>
+              <option value="dissertation">Dissertation / Thesis</option>
+              <option value="report">Report / Technical Report</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div><label>Author(s) <span style="font-weight:400;color:var(--text3)">(Last, F. M. — one per line)</span></label>
+          <textarea id="apaAuthors" rows="3" placeholder="Staudt Willet, K. B.&#10;Dennen, V. P." oninput="buildApa()"></textarea></div>
+        </div>
+        <div class="form-row cols2">
+          <div><label>Year</label><input type="text" id="apaYear" placeholder="2024" oninput="buildApa()"></div>
+          <div id="apaVolumeWrap"><label>Volume</label><input type="text" id="apaVolume" placeholder="12" oninput="buildApa()"></div>
+        </div>
+        <div class="form-row">
+          <div><label>Title of Article / Chapter / Book <button type="button" class="btn btn-secondary btn-sm" style="padding:2px 8px;font-size:10px;margin-left:6px" onclick="toSentenceCase('apaTitle')">Sentence case</button></label><input type="text" id="apaTitle" placeholder="Title of the work" oninput="buildApa()"></div>
+        </div>
+        <div id="apaJournalFields">
+          <div class="form-row cols2">
+            <div><label>Journal Name</label><input type="text" id="apaJournal" placeholder="Journal of Learning Design" oninput="buildApa()"></div>
+            <div><label>Issue</label><input type="text" id="apaIssue" placeholder="3" oninput="buildApa()"></div>
+          </div>
+          <div class="form-row cols2">
+            <div><label>Pages</label><input type="text" id="apaPages" placeholder="45–67" oninput="buildApa()"></div>
+            <div><label>DOI / URL</label><input type="text" id="apaDoi" placeholder="https://doi.org/..." oninput="buildApa()"></div>
+          </div>
+        </div>
+        <div id="apaBookFields" style="display:none">
+          <div class="form-row cols2">
+            <div><label>Publisher</label><input type="text" id="apaPublisher" placeholder="Routledge" oninput="buildApa()"></div>
+            <div><label>Edition</label><input type="text" id="apaEdition" placeholder="3rd" oninput="buildApa()"></div>
+          </div>
+          <div class="form-row">
+            <div><label>DOI / URL (if available)</label><input type="text" id="apaBookDoi" placeholder="https://doi.org/..." oninput="buildApa()"></div>
+          </div>
+        </div>
+        <div id="apaChapterFields" style="display:none">
+          <div class="form-row">
+            <div><label>Chapter Title <button type="button" class="btn btn-secondary btn-sm" style="padding:2px 8px;font-size:10px;margin-left:6px" onclick="toSentenceCase('apaChapterTitle')">Sentence case</button></label><input type="text" id="apaChapterTitle" placeholder="Chapter title" oninput="buildApa()"></div>
+          </div>
+          <div class="form-row">
+            <div><label>Book Editor(s)</label><input type="text" id="apaEditors" placeholder="Smith, J. A." oninput="buildApa()"></div>
+          </div>
+          <div class="form-row cols2">
+            <div><label>Book Title <button type="button" class="btn btn-secondary btn-sm" style="padding:2px 8px;font-size:10px;margin-left:6px" onclick="toSentenceCase('apaBookTitle')">Sentence case</button></label><input type="text" id="apaBookTitle" placeholder="Book title" oninput="buildApa()"></div>
+            <div><label>Pages in Book</label><input type="text" id="apaChapPages" placeholder="pp. 45–67" oninput="buildApa()"></div>
+          </div>
+          <div class="form-row">
+            <div><label>Publisher</label><input type="text" id="apaChapPublisher" placeholder="Publisher name" oninput="buildApa()"></div>
+          </div>
+        </div>
+        <div id="apaWebFields" style="display:none">
+          <div class="form-row">
+            <div><label>Site / Organization Name</label><input type="text" id="apaSite" placeholder="Org name" oninput="buildApa()"></div>
+          </div>
+          <div class="form-row">
+            <div><label>URL</label><input type="text" id="apaUrl" placeholder="https://..." oninput="buildApa()"></div>
+          </div>
+        </div>
+        <div id="apaDisserFields" style="display:none">
+          <div class="form-row cols2">
+            <div><label>Institution</label><input type="text" id="apaInstitution" placeholder="Florida State University" oninput="buildApa()"></div>
+            <div><label>Database / URL</label><input type="text" id="apaDisserUrl" placeholder="ProQuest Dissertations" oninput="buildApa()"></div>
+          </div>
+        </div>
+        <div id="apaReportFields" style="display:none">
+          <div class="form-row cols2">
+            <div><label>Institution / Publisher</label><input type="text" id="apaReportInst" placeholder="RAND Corporation" oninput="buildApa()"></div>
+            <div><label>Report Number</label><input type="text" id="apaReportNum" placeholder="RR-2019" oninput="buildApa()"></div>
+          </div>
+          <div class="form-row">
+            <div><label>URL</label><input type="text" id="apaReportUrl" placeholder="https://..." oninput="buildApa()"></div>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:8px">
+          <button class="btn btn-primary btn-sm" onclick="copyApa()"><i class="ti ti-copy"></i> Copy Citation</button>
+          <button class="btn btn-secondary btn-sm" onclick="clearApa()"><i class="ti ti-trash"></i> Clear</button>
+          <button class="btn btn-gold btn-sm" onclick="saveApaToNotes()"><i class="ti ti-notes"></i> Save to Notes</button>
+        </div>
+      </div>
+      <div>
+        <div class="section-title"><i class="ti ti-eye"></i> Preview</div>
+        <div class="apa-output" id="apaOutput">Fill in the fields to generate your citation…</div>
+        <div style="display:flex;gap:8px;align-items:flex-start;margin-top:10px;padding:10px 12px;background:rgba(206,184,136,0.14);border:1px solid rgba(206,184,136,0.4);border-radius:var(--radius-sm)">
+          <i class="ti ti-alert-circle" style="color:#8a6a1e;font-size:16px;flex-shrink:0;margin-top:1px"></i>
+          <span style="font-size:12px;color:var(--text2);line-height:1.5"><strong>Before you copy this:</strong> titles are sentence case — check that any proper nouns (people, places, named theories/tests) are still capitalized. The "Sentence case" button can't tell a proper noun from a regular word, so this part is on you.</span>
+        </div>
+        <div class="section-title" style="margin-top:20px"><i class="ti ti-clock"></i> Quick Tips</div>
+        <div class="card" style="font-size:12px;color:var(--text2);line-height:1.8">
+          <p><strong>Author format:</strong> Last, F. M. — given names auto-convert to initials as you type</p>
+          <p style="margin-top:6px"><strong>Italics:</strong> Journal names + volume, and book/report/webpage titles, are italicized. Article and chapter titles are not.</p>
+          <p style="margin-top:6px"><strong>Journal names:</strong> Title Case (capitalize major words) — type these as-is, don't sentence-case them</p>
+          <p style="margin-top:6px"><strong>Article/chapter/book titles:</strong> Sentence case — only the first word, first word after a colon, and proper nouns are capitalized. Use the "Sentence case" button, then double-check proper nouns (people, places, named theories) — that part can't be fully automated.</p>
+          <p style="margin-top:6px"><strong>DOIs/URLs:</strong> auto-normalized to https://doi.org/ format</p>
+          <p style="margin-top:6px"><strong>Up to 20 authors:</strong> list all of them. <strong>21+:</strong> first 19, then an ellipsis, then the final author (no &amp;)</p>
+          <p style="margin-top:6px"><strong>No date:</strong> use (n.d.) for year</p>
+          <p style="margin-top:6px"><strong>Hanging indent:</strong> shown here for reference, but plain-text copy/paste can't carry it — reapply the hanging indent once it's in Word or Google Docs</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- EXPORT PAGE -->
+  <div class="page" id="page-export">
+    <div class="page-header"><h1>Progress Export</h1><p>Download a semester summary PDF</p></div>
+    <div class="card" style="max-width:640px">
+      <h2 id="exportTitle" style="font-size:18px;font-weight:700;margin-bottom:4px"></h2>
+      <p id="exportSubtitle" style="font-size:13px;color:var(--text2);margin-bottom:20px"></p>
+      <div class="export-grid" id="exportStats"></div>
+      <hr style="border:none;border-top:1px solid var(--border);margin:20px 0">
+      <div id="exportCourses"></div>
+      <div style="margin-top:24px">
+        <button class="btn btn-primary" onclick="downloadExportPDF()"><i class="ti ti-download"></i> Download PDF</button>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /main -->
+
+<!-- MODALS -->
+<div class="modal-overlay" id="modalAssignment">
+  <div class="modal">
+    <h2 id="assignModalTitle">Add Assignment</h2>
+    <input type="hidden" id="editAssignId">
+    <div class="form-row"><div><label>Assignment Name</label><input type="text" id="assignName" placeholder="Research proposal draft"></div></div>
+    <div class="form-row cols2">
+      <div><label>Course</label><select id="assignCourse"></select></div>
+      <div><label>Type</label>
+        <select id="assignType">
+          <option>Assignment</option><option>Discussion</option><option>Quiz</option><option>Exam</option><option>Project</option><option>Presentation</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row cols3">
+      <div><label>Due Date</label><input type="date" id="assignDue"></div>
+      <div><label>Weight (%)</label><input type="number" id="assignWeight" placeholder="20"></div>
+      <div><label>Points</label><input type="number" id="assignPoints" placeholder="100"></div>
+    </div>
+    <div class="form-row">
+      <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-weight:500">
+        <input type="checkbox" id="assignPassFail" style="width:auto" onchange="toggleAssignPassFailUI()">
+        Graded Complete / Incomplete (no points or %)
+      </label>
+      <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-weight:500;margin-top:8px">
+        <input type="checkbox" id="assignOptional" style="width:auto">
+        Optional (not required)
+      </label>
+    </div>
+    <div class="form-row"><div><label>Notes (optional)</label><textarea id="assignNotes" rows="2"></textarea></div></div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" id="deleteAssignBtn" onclick="deleteAssignment()" style="display:none;margin-right:auto;color:#ef4444;border-color:rgba(239,68,68,.4)"><i class="ti ti-trash"></i> Delete</button>
+      <button class="btn btn-secondary" onclick="closeModal('modalAssignment')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveAssignment()">Save</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modalAssignmentNotes">
+  <div class="modal" style="max-width:560px">
+    <h2 id="assignNotesModalTitle" style="margin-bottom:2px">Assignment Notes</h2>
+    <p id="assignNotesModalSub" style="font-size:11px;color:var(--text3);margin-top:0;margin-bottom:16px"></p>
+    <div id="assignNotesList"></div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" id="assignNotesEditBtn" style="margin-right:auto"><i class="ti ti-pencil"></i> Edit Assignment</button>
+      <button class="btn btn-secondary" onclick="closeModal('modalAssignmentNotes')">Close</button>
+      <button class="btn btn-primary" id="assignNotesAddBtn"><i class="ti ti-plus"></i> Add Note</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modalReading">
+  <div class="modal">
+    <h2 id="readModalTitle">Add Reading</h2>
+    <input type="hidden" id="editReadId">
+    <div class="form-row"><div><label>Title</label><input type="text" id="readTitle" placeholder="Article or book title"></div></div>
+    <div class="form-row"><div><label>Citation / Author(s)</label><input type="text" id="readCitation" placeholder="Author, A. (2024). Title. Journal, 12(3), 45–67."></div></div>
+    <div class="form-row cols2">
+      <div><label>Course</label><select id="readCourse"></select></div>
+      <div><label>Week / Module</label><input type="text" id="readWeek" placeholder="Week 3"></div>
+    </div>
+    <div class="form-row"><div><label>URL (optional)</label><input type="url" id="readUrl" placeholder="https://..."></div></div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" id="deleteReadBtn" onclick="deleteReading()" style="display:none;margin-right:auto;color:#ef4444;border-color:rgba(239,68,68,.4)"><i class="ti ti-trash"></i> Delete</button>
+      <button class="btn btn-secondary" onclick="closeModal('modalReading')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveReading()">Save</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modalNote">
+  <div class="modal" style="max-width:640px">
+    <h2 id="noteModalTitle">New Note</h2>
+    <p id="noteModalTime" style="font-size:11px;color:var(--text3);margin-top:-14px;margin-bottom:16px"></p>
+    <input type="hidden" id="editNoteId">
+    <input type="hidden" id="noteAssignId">
+    <div class="form-row"><div><label>Title</label><input type="text" id="noteTitle" placeholder="Note title"></div></div>
+    <div class="form-row cols2">
+      <div><label>Course (optional)</label><select id="noteCourse"><option value="">— No course —</option></select><div id="noteSemesterLabel" style="font-size:11px;color:var(--text3);margin-top:4px"></div></div>
+      <div><label>Module / Week</label><select id="noteModule"><option value="">— Select —</option></select></div>
+    </div>
+    <div class="form-row"><div><label>Body</label><textarea id="noteBody" rows="8" placeholder="Your notes…"></textarea></div></div>
+    <div class="form-row"><div><label>Tags (comma-separated)</label><input type="text" id="noteTags" placeholder="cognition, proposal, week3"></div></div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" id="deleteNoteBtn" onclick="deleteNote()" style="display:none;margin-right:auto;color:#ef4444;border-color:rgba(239,68,68,.4)"><i class="ti ti-trash"></i> Delete</button>
+      <button class="btn btn-secondary" onclick="closeModal('modalNote')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveNote()">Save</button>
+    </div>
+  </div>
+</div>
+
+<button id="floatNoteBtn" onclick="openAddNote()" title="Add a note" style="
+  position:fixed; bottom:28px; right:28px; z-index:350;
+  width:52px; height:52px; border-radius:50%; border:none; cursor:pointer;
+  background:#033F40; color:#FFFAAC; font-size:22px;
+  display:flex; align-items:center; justify-content:center;
+  box-shadow:0 4px 16px rgba(3,63,64,0.45); transition:transform .15s, box-shadow .15s;
+" onmouseenter="this.style.transform='scale(1.1)'" onmouseleave="this.style.transform='scale(1)'">
+  <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+    <polyline points="14 2 14 8 20 8"/>
+    <line x1="16" y1="13" x2="8" y2="13"/>
+    <line x1="16" y1="17" x2="8" y2="17"/>
+    <line x1="10" y1="9" x2="8" y2="9"/>
+  </svg>
+</button>
+<!-- IMPORT READINGS MODAL -->
+<div class="modal-overlay" id="modalImport">
+  <div class="modal" style="max-width:680px">
+    <h2>Import Readings from Canvas</h2>
+    <p style="font-size:13px;color:var(--text2);margin-top:-12px;margin-bottom:20px">Paste your reading list directly from Canvas. The importer will parse author, title, journal, and DOI/URL automatically.</p>
+
+    <!-- Step 1: Paste -->
+    <div id="importStep1">
+      <div class="form-row cols2">
+        <div>
+          <label>Course</label>
+          <select id="importCourse"></select>
+        </div>
+        <div>
+          <label>Module / Week label</label>
+          <input type="text" id="importWeekLabel" placeholder="e.g. Week 2 · Skim">
+        </div>
+      </div>
+      <div class="form-row">
+        <div>
+          <label>Paste reading list text from Canvas</label>
+          <textarea id="importText" rows="10" placeholder="Paste your Canvas readings here. Each citation on its own line or paragraph works best. Example:
+
+Bodily, R., Leary, H., & West, R. E. (2019). Research trends in instructional design and technology journals. British Journal of Educational Technology, 50(1), 64-79. doi:10.1111/bjet.12712
+
+Corrin, L., Thompson, K., Hwang, G. J., & Lodge, J. M. (2022). The importance of choosing the right keywords..."></textarea>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;justify-content:flex-end">
+        <button class="btn btn-secondary" onclick="closeModal('modalImport')">Cancel</button>
+        <button class="btn btn-primary" onclick="parseImport()"><i class="ti ti-wand"></i> Parse & Preview</button>
+      </div>
+    </div>
+
+
+    <!-- Step 2: Preview & confirm -->
+    <div id="importStep2" style="display:none">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px">
+        <div style="font-size:13px;font-weight:600;color:var(--text)">Found <span id="importCount">0</span> readings — review before saving</div>
+        <button class="btn btn-secondary btn-sm" onclick="backToImportStep1()"><i class="ti ti-arrow-left"></i> Back</button>
+      </div>
+      <div id="importPreviewList" style="max-height:360px;overflow-y:auto;border:1.5px solid var(--border);border-radius:var(--radius-md);padding:4px"></div>
+      <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:16px">
+        <button class="btn btn-secondary" onclick="closeModal('modalImport')">Cancel</button>
+        <button class="btn btn-primary" onclick="confirmImport()"><i class="ti ti-check"></i> Add All to Dashboard</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- IMPORT ASSIGNMENTS MODAL -->
+<div class="modal-overlay" id="modalImportAssign">
+  <div class="modal" style="max-width:680px">
+    <h2>Import Assignments from Canvas</h2>
+    <p style="font-size:13px;color:var(--text2);margin-top:-12px;margin-bottom:20px">Go to your course's Assignments page in Canvas, select all (Ctrl/Cmd+A) and copy, then paste below. This reads what's actually in Canvas right now — it won't miss anything new or add anything that isn't really there.</p>
+
+    <div id="importAssignStep1">
+      <div class="form-row">
+        <div>
+          <label>Course</label>
+          <select id="importAssignCourse"></select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div>
+          <label>Paste assignment list text from Canvas</label>
+          <textarea id="importAssignText" rows="10" placeholder="Paste your Canvas Assignments page here. Example:
+
+Response Essay #2
+Due Jul 19 at 11:59pm | -/10 pts
+
+Week 10 Discussion: Motivation & Self-efficacy
+Due Jul 19 at 11:59pm | -/2 pts
+
+Portfolio
+Due Jul 31 at 11:59pm | -/24 pts"></textarea>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;justify-content:flex-end">
+        <button class="btn btn-secondary" onclick="closeModal('modalImportAssign')">Cancel</button>
+        <button class="btn btn-primary" onclick="parseAssignImport()"><i class="ti ti-wand"></i> Parse & Preview</button>
+      </div>
+    </div>
+
+    <div id="importAssignStep2" style="display:none">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px">
+        <div style="font-size:13px;font-weight:600;color:var(--text)">Found <span id="importAssignCount">0</span> assignments — review before saving</div>
+        <button class="btn btn-secondary btn-sm" onclick="backToImportAssignStep1()"><i class="ti ti-arrow-left"></i> Back</button>
+      </div>
+      <p style="font-size:12px;color:var(--text3);margin-top:-6px;margin-bottom:10px">Anything that already matches something in your Assignments list is unchecked automatically — double-check before adding.</p>
+      <div id="importAssignPreviewList" style="max-height:360px;overflow-y:auto;border:1.5px solid var(--border);border-radius:var(--radius-md);padding:4px"></div>
+      <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:16px">
+        <button class="btn btn-secondary" onclick="closeModal('modalImportAssign')">Cancel</button>
+        <button class="btn btn-primary" onclick="confirmAssignImport()"><i class="ti ti-check"></i> Add Checked</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CONNECTION EDIT MODAL -->
+<div class="modal-overlay" id="modalConnection">
+  <div class="modal">
+    <h2 id="connectionModalTitle">Add Connection</h2>
+    <input type="hidden" id="editConnectionId">
+    <div class="form-row"><div><label>Title</label><input type="text" id="connectionTitle" placeholder="Shared Research Proposal"></div></div>
+    <div class="form-row"><div><label>Description</label><textarea id="connectionDesc" rows="2" placeholder="The capstone proposal counts for both courses — coordinate your effort."></textarea></div></div>
+    <div class="form-row"><div><label>Courses this connects (pick 2 or more)</label><div id="connectionCoursesList" style="display:flex;flex-direction:column;gap:6px;margin-top:4px"></div></div></div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" id="deleteConnectionBtn" onclick="deleteConnection()" style="display:none;margin-right:auto;color:#ef4444;border-color:rgba(239,68,68,.4)"><i class="ti ti-trash"></i> Delete</button>
+      <button class="btn btn-secondary" onclick="closeModal('modalConnection')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveConnection()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- MANAGE SEMESTERS/COURSES MODAL -->
+<div class="modal-overlay" id="modalManageSemesters">
+  <div class="modal" style="max-width:640px">
+    <h2 style="margin-bottom:2px">Manage Semesters &amp; Courses</h2>
+    <p style="font-size:12px;color:var(--text3);margin-top:0;margin-bottom:16px">Add a new semester when it's time, or add/edit the courses inside any semester — no database access needed.</p>
+    <div style="display:flex;justify-content:flex-end;margin-bottom:10px">
+      <button class="btn btn-primary btn-sm" onclick="openAddSemester()"><i class="ti ti-plus"></i> Add Semester</button>
+    </div>
+    <div id="manageSemestersList" style="max-height:55vh;overflow-y:auto"></div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modalManageSemesters')">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- SEMESTER EDIT MODAL -->
+<div class="modal-overlay" id="modalSemester">
+  <div class="modal">
+    <h2 id="semesterModalTitle">Add Semester</h2>
+    <input type="hidden" id="editSemesterId">
+    <div class="form-row"><div><label>Name</label><input type="text" id="semesterName" placeholder="Fall 2028"></div></div>
+    <div class="form-row cols2">
+      <div><label>Term</label><select id="semesterTerm"><option>Fall</option><option>Spring</option><option>Summer</option></select></div>
+      <div><label>Year</label><input type="number" id="semesterYear" placeholder="2028"></div>
+    </div>
+    <div class="form-row cols2">
+      <div><label>Start Date</label><input type="date" id="semesterStart"></div>
+      <div><label>End Date</label><input type="date" id="semesterEnd"></div>
+    </div>
+    <div class="form-row">
+      <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-weight:500">
+        <input type="checkbox" id="semesterIsCurrent" style="width:auto">
+        This is my current semester (unmarks any other semester)
+      </label>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" id="deleteSemesterBtn" onclick="deleteSemester()" style="display:none;margin-right:auto;color:#ef4444;border-color:rgba(239,68,68,.4)"><i class="ti ti-trash"></i> Delete</button>
+      <button class="btn btn-secondary" onclick="backToManageSemesters()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveSemester()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- COURSE EDIT MODAL -->
+<div class="modal-overlay" id="modalCourse">
+  <div class="modal">
+    <h2 id="courseModalTitle">Add Course</h2>
+    <input type="hidden" id="editCourseId">
+    <input type="hidden" id="editCourseSemesterId">
+    <div class="form-row cols2">
+      <div><label>Course Code</label><input type="text" id="courseCode" placeholder="EME 6920"></div>
+      <div><label>Credits</label><input type="number" id="courseCredits" placeholder="3"></div>
+    </div>
+    <div class="form-row"><div><label>Course Name</label><input type="text" id="courseName" placeholder="Course title"></div></div>
+    <div class="form-row cols2">
+      <div><label>Instructor (optional)</label><input type="text" id="courseInstructor" placeholder="Last, F."></div>
+      <div><label>Email (optional)</label><input type="email" id="courseEmail" placeholder="x@school.edu"></div>
+    </div>
+    <div class="form-row">
+      <div><label>Card Color</label>
+        <select id="courseColor"><option value="garnet">Garnet</option><option value="gold">Gold</option><option value="blue">Blue</option></select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" id="deleteCourseBtn" onclick="deleteCourse()" style="display:none;margin-right:auto;color:#ef4444;border-color:rgba(239,68,68,.4)"><i class="ti ti-trash"></i> Delete</button>
+      <button class="btn btn-secondary" onclick="backToManageSemesters()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveCourse()">Save</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ────────────────────────────────────────────────
+// CONFIG + STATE
+// ────────────────────────────────────────────────
+let SB_URL = '', SB_KEY = '';
+let courses = [], assignments = [], readings = [], notes = [], semesters = [], connections = [];
+let viewingSemesterId = localStorage.getItem('viewing_semester_id') || null;
+
+function getViewingSemester() {
+  if (viewingSemesterId) {
+    const s = semesters.find(s => s.id === viewingSemesterId);
+    if (s) return s;
+  }
+  return semesters.find(s => s.is_current) || semesters[0] || {};
+}
+
+function setViewingSemester(id) {
+  viewingSemesterId = id;
+  localStorage.setItem('viewing_semester_id', id);
+  renderSemesterSwitcher();
+  renderAll();
+}
+
+function renderSemesterSwitcher() {
+  const sel = document.getElementById('semesterSwitcher');
+  if (!sel || !semesters.length) return;
+  const sorted = [...semesters].sort((a,b) => new Date(b.start_date || 0) - new Date(a.start_date || 0));
+  const activeSem = getViewingSemester();
+  sel.innerHTML = sorted.map(s =>
+    `<option value="${s.id}" ${s.id === activeSem.id ? 'selected' : ''}>${s.name}${s.is_current ? ' (current)' : ''}</option>`
+  ).join('');
+}
+let discData = {}; // { weekKey: { posts: n, tokenUsed: bool } }
+let currentPage = 'today';
+let currentCourseFilter = 'all';
+let currentReadFilter = 'all';
+let currentGradeFilter = 'all';
+let currentNoteFilter = 'all';
+
+// ── SEED DATA ────────────────────────────────────
+const SEED = {
+  semester: { name: 'Fall 2026', term: 'Fall', year: 2026, start_date: null, end_date: null, is_current: true },
+  courses: [],
+  assignments: [],
+  readings: []
+};
+
+// ── SUPABASE ──────────────────────────────────────
+async function sb(method, table, body=null, id=null) {
+  const url = `${SB_URL}/rest/v1/${table}${id ? `?id=eq.${id}` : ''}`;
+  const headers = { 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}`, 'Content-Type': 'application/json', 'Prefer': 'return=representation' };
+  const opts = { method, headers };
+  if (body) opts.body = JSON.stringify(body);
+  const res = await fetch(url, opts);
+  if (!res.ok) { const e = await res.text(); throw new Error(e); }
+  return res.status === 204 ? [] : res.json();
+}
+async function sbGet(table, params='') {
+  const res = await fetch(`${SB_URL}/rest/v1/${table}?${params}&order=created_at.asc`, {
+    headers: { 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}` }
+  });
+  return res.json();
+}
+async function sbPatch(table, id, body) {
+  return sb('PATCH', `${table}?id=eq.${id}`, body);
+}
+async function sbDelete(table, id) {
+  const res = await fetch(`${SB_URL}/rest/v1/${table}?id=eq.${id}`, {
+    method: 'DELETE',
+    headers: { 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}` }
+  });
+  return res.ok;
+}
+
+// ── INIT ─────────────────────────────────────────
+async function connectSupabase() {
+  SB_URL = document.getElementById('sbUrl').value.trim().replace(/\/$/, '');
+  SB_KEY = document.getElementById('sbKey').value.trim();
+  if (!SB_URL || !SB_KEY) { showToast('Please fill in both fields'); return; }
+  try {
+    await sbGet('semesters', 'limit=1');
+    localStorage.setItem('sb_url', SB_URL);
+    localStorage.setItem('sb_key', SB_KEY);
+    await launch();
+  } catch(e) { showToast('Connection failed — check your URL and key'); }
+}
+
+async function launch() {
+  document.getElementById('setupScreen').style.display = 'none';
+  document.getElementById('topnav').style.display = 'flex';
+  document.getElementById('mainContent').style.display = 'block';
+  await loadAll();
+  await syncCourseColors();
+  if (!semesters.length) await seedData();
+  renderSemesterSwitcher();
+  initDark();
+  initFontPrefs();
+  nav('today');
+}
+
+async function loadAll() {
+  [semesters, courses, assignments, readings, notes, connections] = await Promise.all([
+    sbGet('semesters'), sbGet('courses'), sbGet('assignments'),
+    sbGet('readings'), sbGet('notes'),
+    sbGet('connections','order=sort_order.asc')
+  ]);
+  const raw = localStorage.getItem('discData');
+  discData = raw ? JSON.parse(raw) : {};
+}
+
+async function seedData() {
+  showToast('Setting up your first semester…');
+  await sb('POST', 'semesters', SEED.semester);
+  await loadAll();
+  showToast('Ready — add your courses under the gear icon!');
+  renderAll();
+}
+
+// ── DARK MODE ─────────────────────────────────────
+function initDark() {
+  const saved = localStorage.getItem('darkMode');
+  const dark = saved !== null ? saved !== 'false' : true;
+  applyDark(dark);
+}
+function toggleDarkMode() {
+  const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+  applyDark(isLight); // if currently light, switch to dark; if dark (no attr), switch to light
+}
+function applyDark(dark) {
+  document.documentElement.setAttribute('data-theme', dark ? '' : 'light');
+  localStorage.setItem('darkMode', String(dark));
+  const btn = document.getElementById('darkBtn');
+  if (btn) btn.innerHTML = dark ? '<i class="ti ti-sun"></i>' : '<i class="ti ti-moon"></i>';
+  const tog = document.getElementById('darkToggleDrawer');
+  if (tog) tog.checked = !dark;
+}
+
+// ── FONT CUSTOMIZATION ────────────────────────────
+function initFontPrefs() {
+  const savedScale = localStorage.getItem('fontScale') || '1';
+  const savedFace = localStorage.getItem('fontFace') || "'Barlow', sans-serif";
+  document.documentElement.style.setProperty('--app-zoom', savedScale);
+  document.documentElement.style.setProperty('--app-font', savedFace);
+  const sizeSel = document.getElementById('fontSizeSelect');
+  const faceSel = document.getElementById('fontFaceSelect');
+  if (sizeSel) sizeSel.value = savedScale;
+  if (faceSel) faceSel.value = savedFace;
+}
+function setFontScale(scale) {
+  document.documentElement.style.setProperty('--app-zoom', scale);
+  localStorage.setItem('fontScale', scale);
+}
+function setFontFace(face) {
+  document.documentElement.style.setProperty('--app-font', face);
+  localStorage.setItem('fontFace', face);
+}
+
+// ── NAV ──────────────────────────────────────────
+function nav(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('[id^="nav-"]').forEach(a => a.classList.remove('active'));
+  document.querySelectorAll('.drawer-links a').forEach(a => a.classList.remove('active'));
+  const el = document.getElementById('page-' + page);
+  if (el) el.classList.add('active');
+  const navEl = document.getElementById('nav-' + page);
+  if (navEl) navEl.classList.add('active');
+  currentPage = page;
+  renderPage(page);
+  window.scrollTo(0, 0);
+}
+function renderPage(page) {
+  if (page === 'today') renderToday();
+  else if (page === 'dashboard') renderDashboard();
+  else if (page === 'assignments') renderAssignments();
+  else if (page === 'grades') renderGrades();
+  else if (page === 'readings') renderReadings();
+  else if (page === 'timeline') renderTimeline();
+  else if (page === 'notes') renderNotes();
+  else if (page === 'export') renderExport();
+}
+function renderAll() { renderPage(currentPage); }
+
+function openDrawer() { document.getElementById('drawer').classList.add('open'); document.getElementById('drawerOverlay').classList.add('open'); }
+function closeDrawer() { document.getElementById('drawer').classList.remove('open'); document.getElementById('drawerOverlay').classList.remove('open'); }
+
+// ── HELPERS ──────────────────────────────────────
+// ── DRAG-TO-REORDER (persists to a sort_order column) ──
+function enableDragReorder(containerId, itemSelector, table, dataArrayName, afterReorder) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  let dragEl = null;
+
+  container.querySelectorAll(itemSelector).forEach(el => {
+    const handle = el.querySelector('.drag-handle');
+    if (!handle) return;
+    handle.setAttribute('draggable', 'true');
+    handle.addEventListener('dragstart', (e) => {
+      dragEl = el;
+      el.classList.add('dragging');
+      e.dataTransfer.effectAllowed = 'move';
+    });
+    handle.addEventListener('dragend', () => {
+      el.classList.remove('dragging');
+      dragEl = null;
+    });
+  });
+
+  container.ondragover = (e) => {
+    e.preventDefault();
+    if (!dragEl) return;
+    const siblings = [...container.querySelectorAll(`${itemSelector}:not(.dragging)`)];
+    const after = siblings.reduce((closest, child) => {
+      const box = child.getBoundingClientRect();
+      const offset = e.clientY - box.top - box.height / 2;
+      if (offset < 0 && offset > closest.offset) return { offset, element: child };
+      return closest;
+    }, { offset: -Infinity, element: null }).element;
+    if (after == null) container.appendChild(dragEl);
+    else container.insertBefore(dragEl, after);
+  };
+
+  container.ondrop = async (e) => {
+    e.preventDefault();
+    if (!dragEl) return;
+    const items = [...container.querySelectorAll(itemSelector)];
+    const dataArr = getReorderableArray(dataArrayName);
+    for (let i = 0; i < items.length; i++) {
+      const id = items[i].dataset.id;
+      const item = dataArr.find(x => x.id === id);
+      if (item && item.sort_order !== i) {
+        item.sort_order = i;
+        await sbPatch(table, id, { sort_order: i });
+      }
+    }
+    if (afterReorder) afterReorder();
+  };
+}
+function getReorderableArray(name) {
+  if (name === 'assignments') return assignments;
+  if (name === 'readings') return readings;
+  if (name === 'notes') return notes;
+  if (name === 'courses') return courses;
+  return [];
+}
+
+function courseById(id) { return courses.find(c => c.id === id) || {}; }
+function colorToTagClass(color) {
+  return color === 'gold' ? 'tag-gold' : color === 'blue' ? 'tag-blue' : 'tag-garnet';
+}
+function courseTag(c) {
+  if (!c || !c.code) return '';
+  return `<span class="tag ${colorToTagClass(c.color)}">${c.code}</span>`;
+}
+function filterBtnClass(color) {
+  if (!color) return '';
+  return color === 'gold' ? 'fb-gold' : color === 'blue' ? 'fb-blue' : 'fb-garnet';
+}
+function slugify(s) {
+  return (s || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+}
+function fmtDate(d) {
+  if (!d) return '—';
+  const dt = new Date(d + 'T12:00:00');
+  return dt.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+}
+function daysUntil(d) {
+  if (!d) return null;
+  return Math.ceil((new Date(d + 'T12:00:00') - new Date()) / 86400000);
+}
+function isDueToday(d) { return daysUntil(d) === 0; }
+function urgencyDot(d) {
+  const days = daysUntil(d);
+  if (days === null) return 'ok';
+  if (days < 0) return 'overdue';
+  if (days <= 3) return 'soon';
+  return 'ok';
+}
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+
+// ── TODAY ─────────────────────────────────────────
+const REFLECTION_PROMPTS = [
+  "What's the central argument of the last article you read?",
+  "How does your research question connect to your professional work right now?",
+  "What's one concept from this week's readings you'd push back on?",
+  "What gap in the literature is your study trying to fill?",
+  "What's your current working definition of your key construct?",
+  "What would a practitioner say is wrong with the research you've been reading?",
+  "What assumption is baked into your research question that you haven't examined yet?",
+  "If you had to explain your study to someone on the elevator, what would you say?",
+  "What's the most surprising thing you've learned this week?",
+  "What theory are you working with — and do you actually believe it?",
+];
+
+function renderToday() {
+  const now = new Date();
+  const hour = now.getHours();
+  const greet = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+  document.getElementById('todayGreeting').textContent = greet + '!';
+  document.getElementById('todaySubtitle').textContent = now.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+  const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+
+  const curSem = getViewingSemester();
+  const semCourseIds = new Set((curSem.id ? courses.filter(c => c.semester_id === curSem.id) : courses).map(c => c.id));
+  const pending = assignments.filter(a => !a.completed && a.due_date && !a.optional && semCourseIds.has(a.course_id))
+    .sort((a,b) => new Date(a.due_date) - new Date(b.due_date) || (a.sort_order||0) - (b.sort_order||0));
+
+  // ── COUNTDOWN: next deadline ──
+  const next = pending[0];
+  const cdEl = document.getElementById('todayCountdown');
+  if (next) {
+    const days = daysUntil(next.due_date);
+    const c = courseById(next.course_id);
+    const color = days < 0 ? 'var(--pink)' : days <= 2 ? (isLight ? '#425563' : '#5CB8B2') : 'var(--teal)';
+    const label = days < 0 ? `${Math.abs(days)}d overdue` : days === 0 ? 'due today' : days === 1 ? 'due tomorrow' : `${days} days`;
+    cdEl.innerHTML = `
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:42px;font-weight:800;color:${color};line-height:1">${days < 0 ? '-' : ''}${Math.abs(days)}<span style="font-size:18px;font-weight:600;margin-left:4px">${days === 0 ? 'today' : 'd'}</span></div>
+      <div style="font-size:11px;color:${isLight ? 'rgba(36,16,22,0.68)' : 'rgba(255,255,255,0.55)'};margin-top:2px;text-align:right">${next.name}</div>
+      <div style="margin-top:4px;text-align:right">${courseTag(c)}</div>`;
+  } else {
+    cdEl.innerHTML = `<div style="font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;color:${isLight ? '#425563' : 'var(--teal)'}">All clear</div>`;
+  }
+
+  // ── NEXT UP: top 3 most urgent ──
+  const overdue = pending.filter(a => daysUntil(a.due_date) < 0);
+  const soon    = pending.filter(a => { const d = daysUntil(a.due_date); return d >= 0 && d <= 3; });
+  const later   = pending.filter(a => { const d = daysUntil(a.due_date); return d > 3 && d <= 7; });
+  const focus   = [...overdue, ...soon, ...later].slice(0, 4);
+
+  let nextHtml = '';
+  if (!focus.length) {
+    nextHtml = `<div class="focus-item"><div class="focus-icon green"><i class="ti ti-check"></i></div><div class="focus-content"><strong>Nothing urgent!</strong><span>You're ahead of the game.</span></div></div>`;
+  }
+  focus.forEach(a => {
+    const c = courseById(a.course_id);
+    const days = daysUntil(a.due_date);
+    const isOverdue = days < 0;
+    const isSoon = days >= 0 && days <= 2;
+    const iconType = isOverdue ? 'red' : isSoon ? 'amber' : 'blue';
+    const icon = isOverdue ? 'ti-alert-triangle' : isSoon ? 'ti-clock' : 'ti-calendar';
+    const dueStr = isOverdue ? `${Math.abs(days)}d overdue` : days === 0 ? 'Due today' : days === 1 ? 'Due tomorrow' : `Due ${fmtDate(a.due_date)}`;
+    const dueTodayCls = days === 0 ? ' due-today' : '';
+    nextHtml += `<div class="focus-item${dueTodayCls}" style="cursor:pointer" onclick="nav('assignments')">
+      <div class="focus-icon ${iconType}"><i class="ti ${icon}"></i></div>
+      <div class="focus-content"><strong>${a.name}</strong>
+        <span>${dueStr} · ${courseTag(c)}</span>
+      </div>
+      <i class="ti ti-chevron-right" style="font-size:14px;color:var(--text3);flex-shrink:0"></i>
+    </div>`;
+  });
+  document.getElementById('todayNextUp').innerHTML = nextHtml;
+
+  // ── THIS WEEK ──
+  const weekStart = new Date(now); weekStart.setDate(now.getDate() - now.getDay() + 1);
+  const weekEnd   = new Date(weekStart); weekEnd.setDate(weekStart.getDate() + 6);
+  const weekAssign = pending.filter(a => {
+    const d = new Date(a.due_date + 'T12:00:00');
+    return d >= weekStart && d <= weekEnd;
+  });
+  const weekReads = readings.filter(r => !r.is_read && semCourseIds.has(r.course_id));
+  const semStart = curSem.start_date ? new Date(curSem.start_date + 'T12:00:00') : new Date('2026-05-12');
+  const semEnd   = curSem.end_date ? new Date(curSem.end_date + 'T12:00:00') : new Date('2026-08-01');
+  const semTotal = (semEnd - semStart) / 86400000;
+  const semDone  = (now - semStart) / 86400000;
+  const semPct   = Math.min(100, Math.max(0, Math.round(semDone / semTotal * 100)));
+  const daysLeft = Math.max(0, Math.ceil((semEnd - now) / 86400000));
+
+  const dayNames = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  const todayDow = now.getDay() === 0 ? 6 : now.getDay() - 1;
+  const dayDots = dayNames.map((d, i) => {
+    const dayDate = new Date(weekStart); dayDate.setDate(weekStart.getDate() + i);
+    const hasDue = pending.some(a => {
+      const dd = new Date(a.due_date + 'T12:00:00');
+      return dd.toDateString() === dayDate.toDateString();
+    });
+    const isToday = i === todayDow;
+    const isPast = i < todayDow;
+    return `<div style="flex:1;text-align:center">
+      <div style="font-size:10px;font-weight:700;text-transform:uppercase;color:${isToday ? 'var(--pink)' : isPast ? 'var(--text3)' : 'var(--text2)'};margin-bottom:4px">${d}</div>
+      <div style="width:28px;height:28px;border-radius:50%;margin:0 auto;
+        background:${isToday ? 'var(--pink)' : isPast ? 'var(--surface2)' : 'var(--surface)'};
+        border:1px solid ${isToday ? 'var(--pink)' : hasDue ? (isLight ? '#425563' : '#5CB8B2') : 'var(--border)'};
+        display:flex;align-items:center;justify-content:center">
+        ${hasDue ? `<div style="width:6px;height:6px;border-radius:50%;background:${isToday ? '#fff' : (isLight ? '#425563' : '#5CB8B2')}"></div>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('todayWeek').innerHTML = `
+    <div style="display:flex;gap:4px;margin-bottom:14px">${dayDots}</div>
+    <div style="display:flex;flex-direction:column;gap:7px">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <span style="font-size:12px;color:var(--text3)">This week</span>
+        <span style="font-size:13px;font-weight:600;color:var(--text)">${weekAssign.length} deadline${weekAssign.length !== 1 ? 's' : ''}</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <span style="font-size:12px;color:var(--text3)">Unread</span>
+        <span style="font-size:13px;font-weight:600;color:var(--text)">${weekReads.length} readings</span>
+      </div>
+      <div style="margin-top:4px">
+        <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+          <span style="font-size:11px;color:var(--text3)">Semester progress</span>
+          <span style="font-size:11px;color:var(--text3)">${daysLeft}d left</span>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" style="width:${semPct}%"></div></div>
+      </div>
+    </div>`;
+
+  // ── READING QUEUE: next 5 unread, sorted by urgency ──
+  const semReadings = readings.filter(r => semCourseIds.has(r.course_id));
+  const unread = semReadings.filter(r => !r.is_read);
+  // sort: readings with a closer inferred due date first
+  const withDue = unread.map(r => {
+    const c = courseById(r.course_id);
+    const d = inferReadingDueDate(c ? c.id : null, r.week_label);
+    return { ...r, _inferredDue: d ? new Date(d + 'T12:00:00') : new Date('2099-01-01') };
+  }).sort((a,b) => a._inferredDue - b._inferredDue);
+  const queue = withDue.slice(0, 5);
+  const readDone = semReadings.filter(r => r.is_read).length;
+  const readTotal = semReadings.length;
+  const readPct = readTotal ? Math.round(readDone / readTotal * 100) : 0;
+
+  document.getElementById('todayReadProgress').textContent = `${readDone} / ${readTotal} complete`;
+
+  let qHtml = '';
+  if (!queue.length) {
+    qHtml = '<div style="padding:14px 18px;font-size:13px;color:var(--teal)"><i class="ti ti-check"></i> All readings complete!</div>';
+  }
+  queue.forEach(r => {
+    const c = courseById(r.course_id);
+    const daysStr = r._inferredDue < new Date('2098-01-01') ? (() => {
+      const d = Math.ceil((r._inferredDue - now) / 86400000);
+      return d < 0 ? `<span style="color:var(--pink);font-size:10px">overdue</span>` :
+             d === 0 ? `<span style="color:${isLight ? '#425563' : '#5CB8B2'};font-size:10px">today</span>` :
+             `<span style="font-size:10px;color:var(--text3)">${d}d</span>`;
+    })() : '';
+    qHtml += `<div class="reading-row" style="padding:10px 18px;cursor:pointer" onclick="toggleReadingById('${r.id}')">
+      <div class="check-circle ${r.code ? 'cc-' + r.code : ''}" style="flex-shrink:0;margin-top:1px"></div>
+      <div class="reading-text" style="flex:1">
+        <div class="reading-title" style="font-size:13px">${r.title}</div>
+        <div style="display:flex;align-items:center;gap:6px;margin-top:3px">
+          ${courseTag(c)}
+          ${r.week_label ? `<span style="font-size:10px;color:var(--text3)">${r.week_label}</span>` : ''}
+          ${daysStr}
+        </div>
+      </div>
+      <i class="ti ti-circle-check" style="font-size:18px;color:var(--text3);flex-shrink:0"></i>
+    </div>`;
+  });
+  if (unread.length > 5) {
+    qHtml += `<div style="padding:8px 18px;font-size:11px;color:var(--text3);text-align:center">+${unread.length - 5} more · <a href="#" onclick="nav('readings');return false" style="color:var(--pink)">view all</a></div>`;
+  }
+  document.getElementById('todayReadQueue').innerHTML = qHtml;
+
+  // reading progress bar
+  document.getElementById('todayReadBar').innerHTML = `
+    <div style="display:flex;justify-content:space-between;margin-bottom:5px">
+      <span style="font-size:11px;color:var(--text3)">Reading progress</span>
+      <span style="font-size:11px;color:var(--text3)">${readPct}%</span>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" style="width:${readPct}%"></div></div>
+    <div style="font-size:11px;color:var(--text3);margin-top:6px">~${unread.length * 20} min remaining · ${Math.ceil(unread.length * 20 / Math.max(1, daysLeft))} min/day to finish</div>`;
+
+  // ── DAILY REFLECTION PROMPT ──
+  const savedPromptIdx = parseInt(localStorage.getItem('todayPromptIdx') || '0');
+  document.getElementById('todayPrompt').textContent = '"' + REFLECTION_PROMPTS[savedPromptIdx % REFLECTION_PROMPTS.length] + '"';
+
+  // Restore any saved draft
+  const draft = localStorage.getItem('todayReflectionDraft');
+  if (draft) document.getElementById('todayReflectionText').value = draft;
+  document.getElementById('todayReflectionText').oninput = () => {
+    localStorage.setItem('todayReflectionDraft', document.getElementById('todayReflectionText').value);
+  };
+}
+
+async function toggleReadingById(id) {
+  const r = readings.find(x => x.id === id);
+  if (!r) return;
+  r.is_read = !r.is_read;
+  await sbPatch('readings', id, { is_read: r.is_read });
+  renderToday();
+}
+
+function newTodayPrompt() {
+  const cur = parseInt(localStorage.getItem('todayPromptIdx') || '0');
+  const next = (cur + 1) % REFLECTION_PROMPTS.length;
+  localStorage.setItem('todayPromptIdx', next);
+  document.getElementById('todayPrompt').textContent = '"' + REFLECTION_PROMPTS[next] + '"';
+}
+
+async function saveTodayReflection() {
+  const text = document.getElementById('todayReflectionText').value.trim();
+  if (!text) { showToast('Nothing to save'); return; }
+  const promptIdx = parseInt(localStorage.getItem('todayPromptIdx') || '0');
+  const prompt = REFLECTION_PROMPTS[promptIdx % REFLECTION_PROMPTS.length];
+  const now = new Date();
+  const data = {
+    title: 'Reflection — ' + now.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+    body: prompt + '\n\n' + text,
+    tags: 'reflection,daily',
+    updated_at: now.toISOString()
+  };
+  const r = await sb('POST', 'notes', data);
+  notes.push(r[0]);
+  document.getElementById('todayReflectionText').value = '';
+  localStorage.removeItem('todayReflectionDraft');
+  showToast('Saved to Notes!');
+}
+
+// ── DASHBOARD ────────────────────────────────────
+function renderDashboard() {
+  const curSem = getViewingSemester();
+  document.getElementById('semesterLabel').textContent = curSem.name || '';
+
+  const semCourses = (curSem.id ? courses.filter(c => c.semester_id === curSem.id) : [...courses])
+    .sort((a,b) => (a.sort_order || 0) - (b.sort_order || 0));
+  const semCourseIds = new Set(semCourses.map(c => c.id));
+
+  const semAssignments = assignments.filter(a => semCourseIds.has(a.course_id));
+  const semReadings = readings.filter(r => semCourseIds.has(r.course_id));
+  const semNotes = notes.filter(n => !n.semester_id || n.semester_id === curSem.id);
+
+  const total = semAssignments.length;
+  const done = semAssignments.filter(a => a.completed).length;
+  const totalR = semReadings.length;
+  const readR = semReadings.filter(r => r.is_read).length;
+
+  document.getElementById('statGrid').innerHTML = `
+    <div class="stat-card"><div class="stat-num">${total}</div><div class="stat-label">Total Assignments</div></div>
+    <div class="stat-card"><div class="stat-num">${done}</div><div class="stat-label">Completed</div></div>
+    <div class="stat-card"><div class="stat-num">${readR}/${totalR}</div><div class="stat-label">Readings Done</div></div>
+    <div class="stat-card"><div class="stat-num">${semNotes.length}</div><div class="stat-label">Research Notes</div></div>
+  `;
+
+  document.getElementById('courseGrid').innerHTML = semCourses.map((c,i) => {
+    const cAssign = assignments.filter(a => a.course_id === c.id);
+    const cDone = cAssign.filter(a => a.completed).length;
+    const pct = cAssign.length ? Math.round(cDone/cAssign.length*100) : 0;
+    const next = cAssign.filter(a => !a.completed && a.due_date && !a.optional).sort((a,b) => new Date(a.due_date)-new Date(b.due_date))[0];
+    const cardClass = c.color === 'gold' ? 'c-gold' : c.color === 'blue' ? 'c-blue' : 'c-garnet';
+    return `<div class="course-card ${cardClass}" data-id="${c.id}">
+      <i class="ti ti-grip-vertical drag-handle" style="position:absolute;top:12px;right:12px;color:rgba(255,255,255,0.6);z-index:2"></i>
+      <div class="course-code">${c.code} · ${c.credits} cr</div>
+      <div class="course-name">${c.name}</div>
+      <div class="course-meta">
+        <span><i class="ti ti-user"></i>${c.instructor || '—'}</span>
+        ${c.email ? `<span><i class="ti ti-mail"></i><a href="mailto:${c.email}">${c.email}</a></span>` : ''}
+        <span style="margin-top:4px"><i class="ti ti-checkbox"></i>${cDone}/${cAssign.length} assignments done</span>
+        ${next ? `<span><i class="ti ti-clock"></i>Next: ${next.name} (${fmtDate(next.due_date)})</span>` : ''}
+      </div>
+      <div class="course-progress">
+        <div style="font-size:11px;color:rgba(255,255,255,0.7);margin-bottom:3px">${pct}% complete</div>
+        <div class="course-progress-bar"><div class="course-progress-fill" style="width:${pct}%"></div></div>
+      </div>
+    </div>`;
+  }).join('');
+  enableDragReorder('courseGrid', '.course-card', 'courses', 'courses');
+
+  // Upcoming deadlines
+  const upcoming = assignments.filter(a => !a.completed && a.due_date && !a.optional && semCourseIds.has(a.course_id))
+    .sort((a,b) => new Date(a.due_date)-new Date(b.due_date)).slice(0,8);
+  let dlHtml = upcoming.map(a => {
+    const c = courseById(a.course_id);
+    const dot = urgencyDot(a.due_date);
+    const dotColor = c.color === 'gold' ? '#CEB888' : c.color === 'blue' ? '#5f7d89' : '#782F40';
+    const dueTodayCls = isDueToday(a.due_date) ? ' due-today' : '';
+    return `<div class="deadline-item${dueTodayCls}"><div class="dl-dot"></div><span class="dl-name">${a.name}</span>${courseTag(c)}<span class="dl-meta">${fmtDate(a.due_date)}</span></div>`.replace('class="dl-dot"', `class="dl-dot" style="background:${dotColor}"`);
+  }).join('') || '<p style="color:var(--text3);font-size:13px;padding:8px 0">No upcoming deadlines</p>';
+  document.getElementById('upcomingDeadlines').innerHTML = dlHtml;
+
+  // Connections — now a real editable feature, scoped to whichever semester is being viewed
+  const semConns = connections.filter(c => c.semester_id === curSem.id)
+    .sort((a,b) => (a.sort_order||0) - (b.sort_order||0));
+  if (semConns.length) {
+    document.getElementById('connectionsShort').innerHTML = semConns.map(c => {
+      const ids = (c.course_ids || '').split(',').filter(Boolean);
+      const tagsHtml = ids.map(cid => courseTag(courseById(cid))).join('');
+      return `<div class="conn-card" style="position:relative">
+        <button class="btn btn-secondary btn-sm btn-icon" style="position:absolute;top:10px;right:10px" onclick="editConnection('${c.id}')"><i class="ti ti-pencil"></i></button>
+        <div class="conn-title"><i class="ti ti-link"></i>${c.title}</div>
+        <div class="conn-courses">${tagsHtml}</div>
+        <div class="conn-desc">${c.description || ''}</div>
+      </div>`;
+    }).join('');
+  } else {
+    document.getElementById('connectionsShort').innerHTML = `<p style="color:var(--text3);font-size:13px;padding:8px 0">No cross-course connections added for ${curSem.name || 'this semester'} yet. Click "Add" to note one.</p>`;
+  }
+}
+
+// ── ASSIGNMENTS ──────────────────────────────────
+let assignUnit = localStorage.getItem('assign_unit') || 'percent';
+
+function setAssignUnit(unit) {
+  assignUnit = unit;
+  localStorage.setItem('assign_unit', unit);
+  renderAssignments();
+}
+
+function renderAssignments() {
+  const curSem = getViewingSemester();
+  const semCourses = curSem.id ? courses.filter(c => c.semester_id === curSem.id) : courses;
+  const filterEl = document.getElementById('assignFilter');
+  const filters = ['All', ...new Set(semCourses.map(c => c.code))];
+  filterEl.innerHTML = filters.map(f => {
+    const fc = semCourses.find(c => c.code === f);
+    return `<button class="filter-btn ${filterBtnClass(fc && fc.color)} ${f === 'All' ? (currentCourseFilter==='all'?'active':'') : (currentCourseFilter===f?'active':'')}" onclick="setAssignFilter('${f}')">${f}</button>`;
+  }).join('');
+
+  document.getElementById('unitBtnPercent').classList.toggle('active', assignUnit === 'percent');
+  document.getElementById('unitBtnPoints').classList.toggle('active', assignUnit === 'points');
+  document.getElementById('assignWeightHeader').textContent = assignUnit === 'points' ? 'Points' : 'Weight';
+
+  const semCourseIds = new Set(semCourses.map(c => c.id));
+  let list = assignments.filter(a => semCourseIds.has(a.course_id));
+  if (currentCourseFilter !== 'all') {
+    const c = courses.find(x => x.code === currentCourseFilter);
+    if (c) list = list.filter(a => a.course_id === c.id);
+  }
+  list.sort((a,b) => {
+    if (!a.due_date && !b.due_date) return (a.sort_order || 0) - (b.sort_order || 0);
+    if (!a.due_date) return 1;
+    if (!b.due_date) return -1;
+    const dateDiff = new Date(a.due_date) - new Date(b.due_date);
+    if (dateDiff !== 0) return dateDiff;
+    return (a.sort_order || 0) - (b.sort_order || 0);
+  });
+
+  const pending   = list.filter(a => !a.completed);
+  const completed = list.filter(a => a.completed);
+
+  function unitCell(a) {
+    if (a.pass_fail) return 'P/F';
+    if (assignUnit === 'points') return (a.points || a.points === 0) ? a.points : '—';
+    return a.weight ? a.weight + '%' : '—';
+  }
+
+  function assignRow(a) {
+    const c = courseById(a.course_id);
+    const hasNotes = !!(a.notes && a.notes.trim()) || notes.some(n => n.assignment_id === a.id);
+    const dueTodayCls = (!a.completed && isDueToday(a.due_date)) ? 'due-today' : '';
+    return `<tr class="${dueTodayCls}" data-id="${a.id}">
+      <td>${a.completed ? '' : '<i class="ti ti-grip-vertical drag-handle"></i>'}</td>
+      <td><div class="check-circle ${a.completed ? 'done' : ''}" onclick="toggleAssign('${a.id}')"></div></td>
+      <td>
+        <span class="dl-name" style="cursor:pointer;${a.completed ? 'opacity:.55;text-decoration:line-through' : ''}" onclick="openAssignmentNotes('${a.id}')">${a.name}</span>
+        ${a.optional ? `<span class="tag tag-gray" style="font-size:9px;margin-left:5px;vertical-align:middle">OPTIONAL</span>` : ''}
+        ${hasNotes ? `<i class="ti ti-notes" title="Has notes" style="font-size:12px;color:var(--text3);margin-left:5px;cursor:pointer" onclick="openAssignmentNotes('${a.id}')"></i>` : ''}
+      </td>
+      <td class="hide-mobile">${courseTag(c)}</td>
+      <td class="hide-mobile" style="${a.completed ? 'opacity:.55' : ''}">${fmtDate(a.due_date)}</td>
+      <td class="hide-mobile" style="${a.completed ? 'opacity:.55' : ''}">${unitCell(a)}</td>
+      <td><button class="btn btn-secondary btn-sm btn-icon" onclick="editAssignment('${a.id}')"><i class="ti ti-pencil"></i></button></td>
+    </tr>`;
+  }
+
+  document.getElementById('assignBody').innerHTML =
+    pending.map(assignRow).join('') ||
+    '<tr><td colspan="7" style="text-align:center;padding:24px;color:var(--text3)">No pending assignments</td></tr>';
+  enableDragReorder('assignBody', 'tr[data-id]', 'assignments', 'assignments', () => { if (currentPage==='today') renderToday(); if (currentPage==='dashboard') renderDashboard(); });
+
+  const sec = document.getElementById('assignCompletedSection');
+  if (completed.length) {
+    sec.style.display = 'block';
+    document.getElementById('assignCompletedCount').textContent = completed.length + ' done';
+    document.getElementById('assignCompletedBody').innerHTML = completed.map(assignRow).join('');
+  } else {
+    sec.style.display = 'none';
+  }
+}
+
+let _completedVisible = true;
+function toggleCompletedVisible() {
+  _completedVisible = !_completedVisible;
+  document.getElementById('assignCompletedWrap').style.display = _completedVisible ? 'block' : 'none';
+  document.getElementById('assignCompletedChevron').style.transform = _completedVisible ? '' : 'rotate(-90deg)';
+}
+
+function setAssignFilter(f) { currentCourseFilter = f === 'All' ? 'all' : f; renderAssignments(); }
+
+async function toggleAssign(id) {
+  const a = assignments.find(x => x.id === id);
+  if (!a) return;
+  a.completed = !a.completed;
+  await sbPatch('assignments', id, { completed: a.completed });
+  renderAssignments();
+  if (currentPage === 'dashboard') renderDashboard();
+  if (currentPage === 'today') renderToday();
+}
+
+function toggleAssignPassFailUI() {
+  const isPF = document.getElementById('assignPassFail').checked;
+  document.getElementById('assignWeight').disabled = isPF;
+  document.getElementById('assignPoints').disabled = isPF;
+  if (isPF) { document.getElementById('assignWeight').value = ''; document.getElementById('assignPoints').value = ''; }
+}
+
+function openAddAssignment() {
+  document.getElementById('editAssignId').value = '';
+  document.getElementById('assignName').value = '';
+  document.getElementById('assignDue').value = '';
+  document.getElementById('assignWeight').value = '';
+  document.getElementById('assignPoints').value = '';
+  document.getElementById('assignNotes').value = '';
+  document.getElementById('assignPassFail').checked = false;
+  document.getElementById('assignOptional').checked = false;
+  toggleAssignPassFailUI();
+  document.getElementById('assignModalTitle').textContent = 'Add Assignment';
+  document.getElementById('deleteAssignBtn').style.display = 'none';
+  const sel = document.getElementById('assignCourse');
+  sel.innerHTML = courses.map(c => `<option value="${c.id}">${c.code}</option>`).join('');
+  openModal('modalAssignment');
+}
+
+function editAssignment(id) {
+  const a = assignments.find(x => x.id === id);
+  if (!a) return;
+  document.getElementById('editAssignId').value = id;
+  document.getElementById('assignName').value = a.name;
+  document.getElementById('assignDue').value = a.due_date || '';
+  document.getElementById('assignWeight').value = a.weight || '';
+  document.getElementById('assignPoints').value = a.points || '';
+  document.getElementById('assignNotes').value = a.notes || '';
+  document.getElementById('assignPassFail').checked = !!a.pass_fail;
+  document.getElementById('assignOptional').checked = !!a.optional;
+  toggleAssignPassFailUI();
+  document.getElementById('assignModalTitle').textContent = 'Edit Assignment';
+  document.getElementById('deleteAssignBtn').style.display = 'inline-flex';
+  const sel = document.getElementById('assignCourse');
+  sel.innerHTML = courses.map(c => `<option value="${c.id}" ${c.id === a.course_id ? 'selected' : ''}>${c.code}</option>`).join('');
+  document.getElementById('assignType').value = a.type || 'Assignment';
+  openModal('modalAssignment');
+}
+
+async function saveAssignment() {
+  const id = document.getElementById('editAssignId').value;
+  const isPF = document.getElementById('assignPassFail').checked;
+  const data = {
+    name: document.getElementById('assignName').value.trim(),
+    course_id: document.getElementById('assignCourse').value,
+    type: document.getElementById('assignType').value,
+    due_date: document.getElementById('assignDue').value || null,
+    weight: isPF ? null : (parseFloat(document.getElementById('assignWeight').value) || null),
+    points: isPF ? null : (parseFloat(document.getElementById('assignPoints').value) || null),
+    pass_fail: isPF,
+    optional: document.getElementById('assignOptional').checked,
+    notes: document.getElementById('assignNotes').value.trim()
+  };
+  if (!data.name) { showToast('Assignment name required'); return; }
+  if (id) { await sbPatch('assignments', id, data); Object.assign(assignments.find(a => a.id === id), data); }
+  else { const r = await sb('POST', 'assignments', { ...data, completed: false }); assignments.push(r[0]); }
+  closeModal('modalAssignment');
+  renderAll();
+  showToast('Saved!');
+}
+
+async function deleteAssignment() {
+  const id = document.getElementById('editAssignId').value;
+  const a = assignments.find(x => x.id === id);
+  if (!id || !a) return;
+  if (!confirm(`Delete assignment “${a.name}”? This cannot be undone.`)) return;
+  const ok = await sbDelete('assignments', id);
+  if (!ok) { showToast('Delete failed'); return; }
+  assignments = assignments.filter(x => x.id !== id);
+  closeModal('modalAssignment');
+  renderAll();
+  showToast('Assignment deleted');
+}
+
+// ── READINGS ─────────────────────────────────────
+// Infer a due date for a group of readings based on course + week label
+// Looks for assignments in the same course whose name contains the week/module number,
+// then returns the latest due date among them.
+function inferReadingDueDate(courseId, weekLabel) {
+  if (!weekLabel) return null;
+  // Extract number from label: "Week 3", "Module 2", "Week 3 · Core" → 3, 2, 3
+  const numMatch = weekLabel.match(/(\d+)/);
+  if (!numMatch) return null;
+  const num = parseInt(numMatch[1]);
+
+  const courseAssignments = assignments.filter(a => a.course_id === courseId && a.due_date);
+  const c = courseById(courseId);
+  const isWeekBased = c.code && c.code.startsWith('EDG');
+
+  // For EDG (week-based): match assignments whose name contains "Week N" or "Week N Discussion"
+  // For EDF (module-based): match assignments whose name contains "Module N"
+  const keyword = isWeekBased ? `Week ${num}` : `Module ${num}`;
+
+  const matches = courseAssignments.filter(a =>
+    a.name.toLowerCase().includes(keyword.toLowerCase())
+  );
+
+  if (!matches.length) return null;
+  // Return the latest (last) due date among matched assignments
+  return matches.sort((a, b) => new Date(b.due_date) - new Date(a.due_date))[0].due_date;
+}
+
+function renderReadings() {
+  const curSem = getViewingSemester();
+  const semCourses = curSem.id ? courses.filter(c => c.semester_id === curSem.id) : courses;
+  const semCourseIds = new Set(semCourses.map(c => c.id));
+  const semReadings = readings.filter(r => semCourseIds.has(r.course_id));
+
+  const done = semReadings.filter(r => r.is_read).length;
+  document.getElementById('readProgress').textContent = `${done} / ${semReadings.length} readings complete`;
+
+  const filters = ['All', ...new Set(semCourses.map(c => c.code))];
+  document.getElementById('readFilter').innerHTML = filters.map(f => {
+    const fc = semCourses.find(c => c.code === f);
+    return `<button class="filter-btn ${filterBtnClass(fc && fc.color)} ${f === 'All' ? (currentReadFilter==='all'?'active':'') : (currentReadFilter===f?'active':'')}" onclick="setReadFilter('${f}')">${f}</button>`;
+  }).join('');
+
+  let list = [...semReadings];
+  if (currentReadFilter !== 'all') {
+    const c = courses.find(x => x.code === currentReadFilter);
+    if (c) list = list.filter(r => r.course_id === c.id);
+  }
+
+  // Group by course then week
+  const grouped = {};
+  list.forEach(r => {
+    const c = courseById(r.course_id);
+    const key = c.code || 'Unknown';
+    if (!grouped[key]) grouped[key] = {};
+    const wk = r.week_label || 'General';
+    if (!grouped[key][wk]) grouped[key][wk] = [];
+    grouped[key][wk].push(r);
+  });
+
+  // Filter out completed from the active list (already grouped above, now rebuild without them)
+  // Re-filter active readings for the grouped display
+  const activeList = list.filter(r => !r.is_read);
+  const completedList = list.filter(r => r.is_read);
+
+  // Rebuild grouped from active only
+  const activeGrouped = {};
+  activeList.forEach(r => {
+    const c = courseById(r.course_id);
+    const key = c.code || 'Unknown';
+    if (!activeGrouped[key]) activeGrouped[key] = {};
+    const wk = r.week_label || 'General';
+    if (!activeGrouped[key][wk]) activeGrouped[key][wk] = [];
+    activeGrouped[key][wk].push(r);
+  });
+
+  let activeHtml = '';
+  const readGroupIds = [];
+  Object.entries(activeGrouped).forEach(([code, weeks]) => {
+    const courseObj = courses.find(c => c.code === code);
+    activeHtml += `<div style="margin-bottom:20px"><div class="section-title" style="margin-bottom:8px"><i class="ti ti-books"></i>${code}</div>`;
+    Object.entries(weeks).forEach(([wk, rs]) => {
+      rs.sort((a,b) => (a.sort_order || 0) - (b.sort_order || 0));
+      const dueDate = courseObj ? inferReadingDueDate(courseObj.id, wk) : null;
+      const days = dueDate ? daysUntil(dueDate) : null;
+      const dueDot = days === null ? '' : days < 0 ? 'overdue' : days <= 3 ? 'soon' : 'ok';
+      const dueColor = dueDot === 'overdue' ? '#ef4444' : dueDot === 'soon' ? '#f59e0b' : 'var(--text3)';
+      const dueBadge = dueDate
+        ? `<span style="font-size:11px;font-weight:600;color:${dueColor};margin-left:8px"><i class="ti ti-calendar-due" style="font-size:11px;vertical-align:middle"></i> Due ${fmtDate(dueDate)}${days !== null && days >= 0 && days <= 7 ? ` · ${days === 0 ? 'today' : days + 'd'}` : ''}</span>`
+        : '';
+      activeHtml += `<div style="font-size:12px;font-weight:600;color:var(--text3);margin:8px 0 4px;display:flex;align-items:center">${wk}${dueBadge}</div>`;
+      const groupId = 'readGroup-' + slugify(code + '-' + wk);
+      readGroupIds.push(groupId);
+      activeHtml += `<div id="${groupId}">`;
+      rs.forEach(r => {
+        const rCourse = courseById(r.course_id);
+        const rCheckClass = rCourse.color === 'gold' ? 'cc-gold' : rCourse.color === 'blue' ? 'cc-blue' : 'cc-garnet';
+        activeHtml += `<div class="reading-row" data-id="${r.id}">
+          <i class="ti ti-grip-vertical drag-handle" style="margin-top:4px"></i>
+          <div class="check-circle ${rCheckClass}" onclick="toggleReading('${r.id}')" style="margin-top:2px"></div>
+          <div class="reading-text">
+            <div class="reading-title">${r.title}${r.url ? ` <a href="${r.url}" target="_blank" style="font-size:11px;color:var(--garnet);margin-left:6px"><i class="ti ti-external-link"></i></a>` : ''}</div>
+            ${r.citation ? `<div class="reading-citation">${r.citation}</div>` : ''}
+          </div>
+          <button class="btn btn-secondary btn-sm btn-icon" onclick="editReading('${r.id}')"><i class="ti ti-pencil"></i></button>
+        </div>`;
+      });
+      activeHtml += `</div>`;
+    });
+    activeHtml += '</div>';
+  });
+
+  // Completed section
+  let completedHtml = '';
+  if (completedList.length) {
+    const cGrouped = {};
+    completedList.forEach(r => {
+      const c = courseById(r.course_id);
+      const key = c.code || 'Unknown';
+      if (!cGrouped[key]) cGrouped[key] = [];
+      cGrouped[key].push(r);
+    });
+
+    let cRows = '';
+    Object.entries(cGrouped).forEach(([code, rs]) => {
+      cRows += `<div style="margin-bottom:14px"><div class="section-title" style="margin-bottom:6px;opacity:.6"><i class="ti ti-books"></i>${code}</div>`;
+      rs.forEach(r => {
+        const rCourse = courseById(r.course_id);
+        const rCheckClass = rCourse.color === 'gold' ? 'cc-gold' : rCourse.color === 'blue' ? 'cc-blue' : 'cc-garnet';
+        cRows += `<div class="reading-row" style="opacity:.55">
+          <div class="check-circle done ${rCheckClass}" onclick="toggleReading('${r.id}')" style="margin-top:2px"></div>
+          <div class="reading-text">
+            <div class="reading-title" style="text-decoration:line-through">${r.title}</div>
+            ${r.week_label ? `<div class="reading-citation">${r.week_label}</div>` : ''}
+          </div>
+          <button class="btn btn-secondary btn-sm btn-icon" onclick="editReading('${r.id}')"><i class="ti ti-pencil"></i></button>
+        </div>`;
+      });
+      cRows += '</div>';
+    });
+
+    completedHtml = `
+      <div style="margin-top:28px;border-top:2px solid var(--border);padding-top:20px">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;cursor:pointer" onclick="toggleReadingCompleted()">
+          <div class="section-title" style="margin-bottom:0"><i class="ti ti-circle-check"></i> Completed</div>
+          <span class="tag tag-gray" style="font-size:11px">${completedList.length} read</span>
+          <i class="ti ti-chevron-down" id="readCompletedChevron" style="font-size:16px;color:var(--text3);margin-left:auto;transition:transform .2s"></i>
+        </div>
+        <div id="readCompletedWrap">${cRows}</div>
+      </div>`;
+  }
+
+  document.getElementById('readingList').innerHTML =
+    (activeHtml || '<p style="color:var(--text3)">No unread readings — nice work!</p>') + completedHtml;
+  readGroupIds.forEach(id => enableDragReorder(id, '.reading-row', 'readings', 'readings'));
+}
+
+let _readCompletedVisible = true;
+function toggleReadingCompleted() {
+  _readCompletedVisible = !_readCompletedVisible;
+  const wrap = document.getElementById("readCompletedWrap");
+  const chevron = document.getElementById("readCompletedChevron");
+  if (wrap) wrap.style.display = _readCompletedVisible ? "block" : "none";
+  if (chevron) chevron.style.transform = _readCompletedVisible ? "" : "rotate(-90deg)";
+}
+function setReadFilter(f) { currentReadFilter = f === "All" ? "all" : f; renderReadings(); }
+function setGradeFilter(f) { currentGradeFilter = f === 'All' ? 'all' : f; renderGrades(); }
+
+async function toggleReading(id) {
+  const r = readings.find(x => x.id === id);
+  if (!r) return;
+  r.is_read = !r.is_read;
+  await sbPatch('readings', id, { is_read: r.is_read });
+  renderReadings();
+}
+
+function openAddReading() {
+  document.getElementById('editReadId').value = '';
+  document.getElementById('readTitle').value = '';
+  document.getElementById('readCitation').value = '';
+  document.getElementById('readWeek').value = '';
+  document.getElementById('readUrl').value = '';
+  document.getElementById('readModalTitle').textContent = 'Add Reading';
+  document.getElementById('deleteReadBtn').style.display = 'none';
+  document.getElementById('readCourse').innerHTML = courses.map(c => `<option value="${c.id}">${c.code}</option>`).join('');
+  openModal('modalReading');
+}
+
+function editReading(id) {
+  const r = readings.find(x => x.id === id);
+  if (!r) return;
+  document.getElementById('editReadId').value = id;
+  document.getElementById('readTitle').value = r.title;
+  document.getElementById('readCitation').value = r.citation || '';
+  document.getElementById('readWeek').value = r.week_label || '';
+  document.getElementById('readUrl').value = r.url || '';
+  document.getElementById('readModalTitle').textContent = 'Edit Reading';
+  document.getElementById('deleteReadBtn').style.display = 'inline-flex';
+  document.getElementById('readCourse').innerHTML = courses.map(c => `<option value="${c.id}" ${c.id === r.course_id ? 'selected' : ''}>${c.code}</option>`).join('');
+  openModal('modalReading');
+}
+
+async function saveReading() {
+  const id = document.getElementById('editReadId').value;
+  const data = {
+    title: document.getElementById('readTitle').value.trim(),
+    course_id: document.getElementById('readCourse').value,
+    citation: document.getElementById('readCitation').value.trim(),
+    week_label: document.getElementById('readWeek').value.trim(),
+    url: document.getElementById('readUrl').value.trim() || null
+  };
+  if (!data.title) { showToast('Title required'); return; }
+  if (id) { await sbPatch('readings', id, data); Object.assign(readings.find(r => r.id === id), data); }
+  else { const r = await sb('POST', 'readings', { ...data, is_read: false }); readings.push(r[0]); }
+  closeModal('modalReading');
+  renderReadings();
+  showToast('Saved!');
+}
+
+async function deleteReading() {
+  const id = document.getElementById('editReadId').value;
+  const r = readings.find(x => x.id === id);
+  if (!id || !r) return;
+  if (!confirm(`Delete reading “${r.title}”? This cannot be undone.`)) return;
+  const ok = await sbDelete('readings', id);
+  if (!ok) { showToast('Delete failed'); return; }
+  readings = readings.filter(x => x.id !== id);
+  closeModal('modalReading');
+  renderAll();
+  showToast('Reading deleted');
+}
+
+// ── TIMELINE ─────────────────────────────────────
+function renderTimeline() {
+  const curSem = getViewingSemester();
+  const start = curSem.start_date ? new Date(curSem.start_date + 'T12:00:00') : new Date('2026-05-12');
+  const end = curSem.end_date ? new Date(curSem.end_date + 'T12:00:00') : new Date('2026-08-01');
+  const today = new Date();
+  const semCourseIds = new Set((curSem.id ? courses.filter(c => c.semester_id === curSem.id) : courses).map(c => c.id));
+
+  const weeks = [];
+  let d = new Date(start);
+  let wNum = 1;
+  while (d <= end) {
+    const wStart = new Date(d);
+    const wEnd = new Date(d); wEnd.setDate(wEnd.getDate() + 6);
+    const isCurrent = today >= wStart && today <= wEnd;
+    const wDl = assignments.filter(a => {
+      if (!a.due_date || !semCourseIds.has(a.course_id)) return false;
+      const dd = new Date(a.due_date + 'T12:00:00');
+      return dd >= wStart && dd <= wEnd;
+    }).sort((a,b) => (a.sort_order||0) - (b.sort_order||0));
+    const wR = readings.filter(r => {
+      if (!r.week_label || !semCourseIds.has(r.course_id)) return false;
+      return r.week_label.toLowerCase().includes(wNum.toString()) ||
+             r.week_label.toLowerCase().includes('week ' + wNum) ||
+             r.week_label.toLowerCase().includes('module ' + wNum);
+    });
+    weeks.push({ num: wNum, start: wStart, end: wEnd, isCurrent, deadlines: wDl, readings: wR });
+    d.setDate(d.getDate() + 7);
+    wNum++;
+  }
+
+  document.getElementById('timelineGrid').innerHTML = weeks.map(w => {
+    const mins = w.readings.length * 20;
+    const pct = Math.min(100, (mins / 120) * 100);
+    return `<div class="week-card ${w.isCurrent ? 'current-week' : ''}">
+      <div class="week-num">Week ${w.num}${w.isCurrent ? ' · CURRENT' : ''}</div>
+      <div class="week-dates">${w.start.toLocaleDateString('en-US',{month:'short',day:'numeric'})} – ${w.end.toLocaleDateString('en-US',{month:'short',day:'numeric'})}</div>
+      <div class="week-mins"><i class="ti ti-clock" style="font-size:12px"></i> ~${mins} min reading</div>
+      <div class="progress-bar" style="margin-bottom:10px"><div class="progress-fill" style="width:${pct}%"></div></div>
+      <div class="week-deadlines">
+        ${w.deadlines.length ? w.deadlines.map(a => {
+          const c = courseById(a.course_id);
+          const dueTodayCls = isDueToday(a.due_date) ? ' due-today' : '';
+          return `<div class="week-dl-item${dueTodayCls}"><i class="ti ti-calendar-event"></i><span>${a.name} ${courseTag(c)} <em style="color:var(--text3);font-size:11px">${fmtDate(a.due_date)}</em></span></div>`;
+        }).join('') : '<span style="font-size:12px;color:var(--text3)">No deadlines this week</span>'}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── DISCUSSION ───────────────────────────────────
+function renderDiscussion() {
+  const curSem = getViewingSemester();
+  const start = curSem.start_date ? new Date(curSem.start_date + 'T12:00:00') : new Date('2026-05-12');
+  const today = new Date();
+
+  const weeks = [];
+  let d = new Date(start);
+  for (let i = 1; i <= 12; i++) {
+    const wEnd = new Date(d); wEnd.setDate(wEnd.getDate() + 6);
+    weeks.push({ num: i, start: new Date(d), end: wEnd });
+    d.setDate(d.getDate() + 7);
+  }
+
+  // Determine 9 graded weeks (weeks with a Sunday deadline — simplified: all 12, lowest dropped)
+  const gradedCount = 9;
+  const tokenUsed = discData['token_used'] || false;
+
+  document.getElementById('discGrid').innerHTML = weeks.map(w => {
+    const key = `week_${w.num}`;
+    const wData = discData[key] || { posts: 0 };
+    const posts = wData.posts || 0;
+    const sunDate = new Date(w.end);
+    const isDropped = w.num === (discData['dropped_week'] || 0);
+    const isPast = today > w.end;
+    const status = posts >= 4 ? 'good' : (posts > 0 ? 'warn' : (isPast ? 'miss' : 'warn'));
+    const statusText = posts >= 4 ? '✓ Complete' : (isPast && posts < 4 ? `${posts}/4 — Missed` : `${posts}/4 posts`);
+
+    return `<div class="disc-card">
+      <div class="disc-week-header">
+        <div class="disc-week-label">Week ${w.num}</div>
+        <div class="disc-deadline">${isDropped ? '🗑 Dropped' : 'Due ' + sunDate.toLocaleDateString('en-US',{month:'short',day:'numeric'})}</div>
+      </div>
+      <div class="disc-dots">
+        ${[1,2,3,4].map(n => `<button class="disc-dot-btn ${posts >= n ? 'filled' : ''}" onclick="setDiscPosts(${w.num}, ${n})">${n}</button>`).join('')}
+        <button class="disc-dot-btn ${posts >= 5 ? 'filled' : ''}" onclick="setDiscPosts(${w.num}, 5)" style="font-size:9px">5+</button>
+      </div>
+      <div class="disc-status ${status}">${statusText}</div>
+      ${isDropped ? '<div class="disc-dropped">Lowest week — automatically dropped</div>' : ''}
+    </div>`;
+  }).join('');
+}
+
+function setDiscPosts(week, n) {
+  const key = `week_${week}`;
+  if (!discData[key]) discData[key] = {};
+  discData[key].posts = n;
+  // Auto-mark lowest dropped week
+  const gradedWeeks = Object.entries(discData).filter(([k]) => k.startsWith('week_'));
+  if (gradedWeeks.length >= 9) {
+    const sorted = gradedWeeks.map(([k,v]) => ({ num: parseInt(k.replace('week_','')), posts: v.posts || 0 }))
+      .sort((a,b) => a.posts - b.posts);
+    discData['dropped_week'] = sorted[0].num;
+  }
+  localStorage.setItem('discData', JSON.stringify(discData));
+  renderDiscussion();
+}
+
+// ── GRADES ───────────────────────────────────────
+function renderGrades() {
+  const curSem = getViewingSemester();
+  let semCourses = curSem.id ? courses.filter(c => c.semester_id === curSem.id) : courses;
+
+  const filterEl = document.getElementById('gradesFilter');
+  const filters = ['All', ...new Set(semCourses.map(c => c.code))];
+  filterEl.innerHTML = filters.map(f => {
+    const fc = semCourses.find(c => c.code === f);
+    return `<button class="filter-btn ${filterBtnClass(fc && fc.color)} ${f === 'All' ? (currentGradeFilter==='all'?'active':'') : (currentGradeFilter===f?'active':'')}" onclick="setGradeFilter('${f}')">${f}</button>`;
+  }).join('');
+
+  if (currentGradeFilter !== 'all') {
+    semCourses = semCourses.filter(c => c.code === currentGradeFilter);
+  }
+
+  document.getElementById('gradesContent').innerHTML = semCourses.map(c => {
+    // Three independent schemes, matched to whatever each assignment actually has:
+    // points-based ("87 / 100 pts"), weight-based ("92% of a 20%-weight item"),
+    // or pass/fail (marked Complete / Incomplete, no points or %).
+    const cAssign = assignments.filter(a => a.course_id === c.id && (a.points || a.weight || a.pass_fail));
+    const ptsAssign = cAssign.filter(a => a.points);
+    const wAssign = cAssign.filter(a => a.weight && !a.points);
+    const pfAssign = cAssign.filter(a => a.pass_fail);
+
+    const ptsGraded = ptsAssign.filter(a => a.grade !== null && a.grade !== undefined);
+    let ptsEarned = null, ptsPossible = null, ptsAvg = null;
+    if (ptsGraded.length) {
+      ptsEarned = ptsGraded.reduce((s,a) => s + a.grade, 0);
+      ptsPossible = ptsGraded.reduce((s,a) => s + a.points, 0);
+      ptsAvg = ptsPossible ? (ptsEarned / ptsPossible) * 100 : null;
+    }
+
+    const wGraded = wAssign.filter(a => a.grade !== null && a.grade !== undefined);
+    let wAvg = null;
+    if (wGraded.length) {
+      const totalW = wGraded.reduce((s,a) => s + a.weight, 0);
+      wAvg = totalW ? wGraded.reduce((s,a) => s + (a.grade * a.weight), 0) / totalW : null;
+    }
+
+    const pfGraded = pfAssign.filter(a => a.grade === 1 || a.grade === 0);
+    let pfComplete = null, pfTotal = null;
+    if (pfGraded.length) {
+      pfComplete = pfGraded.filter(a => a.grade === 1).length;
+      pfTotal = pfGraded.length;
+    }
+
+    const avgParts = [];
+    if (ptsEarned !== null) avgParts.push(`<div class="grade-avg">${ptsEarned} <span style="font-size:15px;color:var(--text3);font-weight:600">/ ${ptsPossible}</span><span style="font-size:10px;font-weight:600;color:var(--text3);display:block;text-transform:uppercase;letter-spacing:.4px">total score${ptsAvg !== null ? ' · ' + ptsAvg.toFixed(1) + '%' : ''}</span></div>`);
+    if (wAvg !== null) avgParts.push(`<div class="grade-avg">${wAvg.toFixed(1)}%<span style="font-size:10px;font-weight:600;color:var(--text3);display:block;text-transform:uppercase;letter-spacing:.4px">weighted</span></div>`);
+    if (pfComplete !== null) avgParts.push(`<div class="grade-avg">${pfComplete} <span style="font-size:15px;color:var(--text3);font-weight:600">/ ${pfTotal}</span><span style="font-size:10px;font-weight:600;color:var(--text3);display:block;text-transform:uppercase;letter-spacing:.4px">complete</span></div>`);
+    const avgHtml = avgParts.length
+      ? `<div style="display:flex;gap:18px;text-align:right">${avgParts.join('')}</div>`
+      : '<div style="font-size:13px;color:var(--text3)">No grades yet</div>';
+
+    function gradeRow(a) {
+      const isPts = !!a.points;
+      const isPF = !!a.pass_fail;
+      const colLabel = isPF ? 'P/F' : isPts ? `${a.points} pts` : `${a.weight}%`;
+      let inputCell;
+      if (isPF) {
+        const isComplete = a.grade === 1;
+        const isIncomplete = a.grade === 0;
+        inputCell = `<div style="display:flex;gap:6px;justify-content:center">
+             <button class="btn btn-sm ${isComplete ? 'btn-primary' : 'btn-secondary'}" onclick="saveGrade('${a.id}', '1')" style="padding:4px 10px">Complete</button>
+             <button class="btn btn-sm ${isIncomplete ? 'btn-primary' : 'btn-secondary'}" onclick="saveGrade('${a.id}', '0')" style="padding:4px 10px">Incomplete</button>
+           </div>`;
+      } else if (isPts) {
+        inputCell = `<div style="display:flex;align-items:center;gap:5px;justify-content:center">
+             <input class="grade-input" type="number" min="0" max="${a.points}" value="${a.grade ?? ''}" placeholder="—" onchange="saveGrade('${a.id}', this.value)" style="width:56px">
+             <span style="font-size:11px;color:var(--text3)">/ ${a.points}</span>
+           </div>`;
+      } else {
+        inputCell = `<div style="display:flex;align-items:center;gap:3px;justify-content:center">
+             <input class="grade-input" type="number" min="0" max="100" value="${a.grade ?? ''}" placeholder="—" onchange="saveGrade('${a.id}', this.value)" style="width:56px">
+             <span style="font-size:11px;color:var(--text3)">%</span>
+           </div>`;
+      }
+      return `<tr class="${isDueToday(a.due_date) ? 'due-today' : ''}">
+        <td>${a.name}</td>
+        <td class="hide-mobile">${fmtDate(a.due_date)}</td>
+        <td>${colLabel}</td>
+        <td>${inputCell}</td>
+      </tr>`;
+    }
+
+    const sortedAssign = [...cAssign].sort((a,b) => {
+      if (!a.due_date && !b.due_date) return (a.sort_order || 0) - (b.sort_order || 0);
+      if (!a.due_date) return 1;
+      if (!b.due_date) return -1;
+      const dateDiff = new Date(a.due_date) - new Date(b.due_date);
+      if (dateDiff !== 0) return dateDiff;
+      return (a.sort_order || 0) - (b.sort_order || 0);
+    });
+
+    return `<div class="card" style="margin-bottom:16px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px">
+        <div style="font-size:15px;font-weight:600">${c.code} — ${c.name}</div>
+        ${avgHtml}
+      </div>
+      <table class="tbl">
+        <thead><tr><th>Assignment</th><th class="hide-mobile" style="width:80px">Due</th><th style="width:90px">Out of</th><th style="width:140px">Your Grade</th></tr></thead>
+        <tbody>
+          ${sortedAssign.length ? sortedAssign.map(gradeRow).join('') : '<tr><td colspan="4" style="text-align:center;padding:16px;color:var(--text3)">No graded-item assignments yet</td></tr>'}
+        </tbody>
+      </table>
+    </div>`;
+  }).join('');
+}
+
+async function saveGrade(id, val) {
+  const grade = val === '' ? null : parseFloat(val);
+  await sbPatch('assignments', id, { grade });
+  const a = assignments.find(x => x.id === id);
+  if (a) a.grade = grade;
+  renderGrades();
+  showToast('Grade saved');
+}
+
+// ── NOTES ────────────────────────────────────────
+function renderNotes() {
+  const search = (document.getElementById('noteSearch')?.value || '').toLowerCase();
+  const allTags = new Set();
+  notes.forEach(n => { if (n.tags) n.tags.split(',').forEach(t => allTags.add(t.trim())); });
+
+  const filters = ['All', ...allTags];
+  document.getElementById('noteFilter').innerHTML = filters.map(f =>
+    `<button class="filter-btn ${(f === 'All' ? currentNoteFilter === 'all' : currentNoteFilter === f) ? 'active' : ''}" onclick="setNoteFilter('${f}')">${f}</button>`
+  ).join('');
+
+  let list = [...notes].sort((a,b) => {
+    if ((a.sort_order || 0) !== (b.sort_order || 0)) return (a.sort_order || 0) - (b.sort_order || 0);
+    return new Date(b.updated_at || b.created_at) - new Date(a.updated_at || a.created_at);
+  });
+  if (currentNoteFilter !== 'all') list = list.filter(n => n.tags && n.tags.split(',').map(t => t.trim()).includes(currentNoteFilter));
+  if (search) list = list.filter(n => (n.title||'').toLowerCase().includes(search) || n.body.toLowerCase().includes(search) || (n.tags||'').toLowerCase().includes(search));
+
+  document.getElementById('notesGrid').innerHTML = list.map(n => {
+    const c = n.course_id ? courseById(n.course_id) : null;
+    const tags = n.tags ? n.tags.split(',').map(t => t.trim()).filter(Boolean) : [];
+    const dt = new Date(n.updated_at || n.created_at);
+    const noteColorClass = c && c.color === 'gold' ? 'note-gold' : c && c.color === 'blue' ? 'note-blue' : c ? 'note-garnet' : '';
+    return `<div class="note-card ${noteColorClass}" data-id="${n.id}" onclick="editNote('${n.id}')">
+      <i class="ti ti-grip-vertical drag-handle" onclick="event.stopPropagation()" style="position:absolute;top:10px;right:10px"></i>
+      <div class="note-title">${n.title || 'Untitled'}</div>
+      <div class="note-body">${n.body}</div>
+      <div class="note-footer">
+        ${c ? courseTag(c) : ''}
+        ${n.semester_id ? `<span class="tag tag-gray">${semesterName(n.semester_id)}</span>` : ''}
+        ${n.module_label ? `<span class="tag tag-gray">${n.module_label}</span>` : ''}
+        ${tags.map(t => `<span class="tag tag-gray">${t}</span>`).join('')}
+        <span class="note-date">${dt.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})} ${dt.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'})}</span>
+      </div>
+    </div>`;
+  }).join('') || '<p style="color:var(--text3);grid-column:1/-1">No notes yet. Click "New Note" to start your research journal.</p>';
+  enableDragReorder('notesGrid', '.note-card', 'notes', 'notes');
+}
+
+function setNoteFilter(f) { currentNoteFilter = f === 'All' ? 'all' : f; renderNotes(); }
+
+function getModulesForCourse(courseId) {
+  const c = courseById(courseId);
+  if (!c || !c.code) return [];
+  if (c.code.startsWith('EDF')) return ['Module 1','Module 2','Module 3','Module 4','Module 5','Module 6','Module 7','Module 8','Module 9'];
+  if (c.code.startsWith('EDG')) return ['Week 1','Week 2','Week 3','Week 4','Week 5','Week 6','Week 7','Week 8','Week 9','Week 10'];
+  if (c.code.startsWith('EME')) return ['Unit 1','Unit 2','Unit 3','Unit 4','Unit 5'];
+  return ['Week 1','Week 2','Week 3','Week 4','Week 5','Week 6','Week 7','Week 8'];
+}
+function populateNoteModules(courseId, currentVal) {
+  const sel = document.getElementById('noteModule');
+  if (!sel) return;
+  const mods = getModulesForCourse(courseId);
+  sel.innerHTML = '<option value="">— Select —</option>' + mods.map(m => `<option value="${m}" ${m===currentVal?'selected':''}>${m}</option>`).join('');
+}
+let _noteReturnToAssignment = null;
+
+function semesterName(id) {
+  const s = semesters.find(x => x.id === id);
+  return s ? s.name : '';
+}
+function noteCourseOptionsHtml(selectedId) {
+  const sorted = [...courses].sort((a,b) => new Date(semesters.find(s=>s.id===b.semester_id)?.start_date || 0) - new Date(semesters.find(s=>s.id===a.semester_id)?.start_date || 0));
+  return '<option value="">— No course —</option>' + sorted.map(c =>
+    `<option value="${c.id}" ${c.id === selectedId ? 'selected' : ''}>${c.code} — ${c.name} (${semesterName(c.semester_id)})</option>`
+  ).join('');
+}
+function updateNoteSemesterLabel(courseId) {
+  const lbl = document.getElementById('noteSemesterLabel');
+  if (!lbl) return;
+  const c = courses.find(x => x.id === courseId);
+  lbl.textContent = c ? `Semester: ${semesterName(c.semester_id) || '—'}` : '';
+}
+
+function openAddNote(prefillAssignmentId) {
+  document.getElementById('editNoteId').value = '';
+  document.getElementById('noteAssignId').value = prefillAssignmentId || '';
+  document.getElementById('noteTitle').value = '';
+  document.getElementById('noteBody').value = '';
+  document.getElementById('noteTags').value = '';
+  document.getElementById('noteModalTitle').textContent = 'New Note';
+  document.getElementById('deleteNoteBtn').style.display = 'none';
+  const nowStr = new Date().toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'}) + ' · ' + new Date().toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
+  const timeEl = document.getElementById('noteModalTime');
+  if (timeEl) timeEl.textContent = nowStr;
+  const sel = document.getElementById('noteCourse');
+  let prefillCourseId = '';
+  if (prefillAssignmentId) {
+    const a = assignments.find(x => x.id === prefillAssignmentId);
+    if (a) {
+      prefillCourseId = a.course_id;
+      document.getElementById('noteTitle').value = a.name;
+      _noteReturnToAssignment = prefillAssignmentId;
+    }
+  } else {
+    _noteReturnToAssignment = null;
+  }
+  sel.innerHTML = noteCourseOptionsHtml(prefillCourseId);
+  sel.onchange = () => { populateNoteModules(sel.value, ''); updateNoteSemesterLabel(sel.value); };
+  populateNoteModules(prefillCourseId, '');
+  updateNoteSemesterLabel(prefillCourseId);
+  openModal('modalNote');
+}
+
+function editNote(id) {
+  const n = notes.find(x => x.id === id);
+  if (!n) return;
+  document.getElementById('editNoteId').value = id;
+  document.getElementById('noteAssignId').value = n.assignment_id || '';
+  document.getElementById('noteTitle').value = n.title || '';
+  document.getElementById('noteBody').value = n.body;
+  document.getElementById('noteTags').value = n.tags || '';
+  document.getElementById('noteModalTitle').textContent = 'Edit Note';
+  document.getElementById('deleteNoteBtn').style.display = 'inline-flex';
+  _noteReturnToAssignment = n.assignment_id || null;
+  const timeEl = document.getElementById('noteModalTime');
+  if (timeEl) {
+    const dt = new Date(n.updated_at || n.created_at);
+    timeEl.textContent = dt.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'}) + ' · ' + dt.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
+  }
+  const sel = document.getElementById('noteCourse');
+  sel.innerHTML = noteCourseOptionsHtml(n.course_id);
+  sel.onchange = () => { populateNoteModules(sel.value, ''); updateNoteSemesterLabel(sel.value); };
+  populateNoteModules(n.course_id || '', n.module_label || '');
+  updateNoteSemesterLabel(n.course_id);
+  openModal('modalNote');
+}
+
+async function saveNote() {
+  const id = document.getElementById('editNoteId').value;
+  const moduleEl = document.getElementById('noteModule');
+  const assignId = document.getElementById('noteAssignId').value || null;
+  const courseId = document.getElementById('noteCourse').value || null;
+  const course = courseId ? courses.find(c => c.id === courseId) : null;
+  const data = {
+    title: document.getElementById('noteTitle').value.trim(),
+    body: document.getElementById('noteBody').value.trim(),
+    course_id: courseId,
+    semester_id: course ? course.semester_id : null,
+    tags: document.getElementById('noteTags').value.trim(),
+    module_label: moduleEl ? moduleEl.value : null,
+    assignment_id: assignId,
+    updated_at: new Date().toISOString()
+  };
+  if (!data.body) { showToast('Note body required'); return; }
+  if (id) { await sbPatch('notes', id, data); Object.assign(notes.find(n => n.id === id), data); }
+  else { const r = await sb('POST', 'notes', data); notes.push(r[0]); }
+  closeModal('modalNote');
+  if (_noteReturnToAssignment) {
+    renderAssignmentNotesList(_noteReturnToAssignment);
+  } else if (currentPage === 'notes') {
+    renderNotes();
+  } else {
+    nav('notes');
+  }
+  showToast('Note saved!');
+}
+
+// ── ASSIGNMENT NOTES QUICK-VIEW ───────────────────
+function openAssignmentNotes(assignmentId) {
+  const a = assignments.find(x => x.id === assignmentId);
+  if (!a) return;
+  document.getElementById('assignNotesModalTitle').textContent = a.name;
+  const c = courseById(a.course_id);
+  document.getElementById('assignNotesModalSub').textContent = [c ? c.code : null, fmtDate(a.due_date)].filter(Boolean).join(' · ');
+  document.getElementById('assignNotesAddBtn').setAttribute('onclick', `openAddNote('${assignmentId}')`);
+  document.getElementById('assignNotesEditBtn').setAttribute('onclick', `editAssignment('${assignmentId}')`);
+  renderAssignmentNotesList(assignmentId);
+  openModal('modalAssignmentNotes');
+}
+
+function renderAssignmentNotesList(assignmentId) {
+  const a = assignments.find(x => x.id === assignmentId);
+  const wrap = document.getElementById('assignNotesList');
+  if (!wrap || !a) return;
+  const linked = notes.filter(n => n.assignment_id === assignmentId)
+    .sort((x,y) => new Date(y.updated_at || y.created_at) - new Date(x.updated_at || x.created_at));
+  let html = '';
+  if (a.notes) {
+    html += `<div class="card" style="margin-bottom:12px">
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--text3);margin-bottom:6px">From the assignment record</div>
+      <div style="font-size:13px;white-space:pre-wrap">${escHtml(a.notes)}</div>
+    </div>`;
+  }
+  if (linked.length) {
+    html += linked.map(n => `
+      <div class="card" style="margin-bottom:10px;cursor:pointer" onclick="closeModal('modalAssignmentNotes');editNote('${n.id}')">
+        ${n.title ? `<div style="font-weight:600;font-size:13px;margin-bottom:4px">${escHtml(n.title)}</div>` : ''}
+        <div style="font-size:13px;color:var(--text2);white-space:pre-wrap">${escHtml((n.body||'').slice(0,240))}${(n.body||'').length>240?'…':''}</div>
+      </div>`).join('');
+  } else if (!a.notes) {
+    html += `<div style="text-align:center;padding:24px;color:var(--text3);font-size:13px">No notes yet for this assignment.</div>`;
+  }
+  wrap.innerHTML = html;
+}
+
+async function deleteNote() {
+  const id = document.getElementById('editNoteId').value;
+  const n = notes.find(x => x.id === id);
+  if (!id || !n) return;
+  const label = n.title || 'Untitled note';
+  if (!confirm(`Delete note “${label}”? This cannot be undone.`)) return;
+  const ok = await sbDelete('notes', id);
+  if (!ok) { showToast('Delete failed'); return; }
+  notes = notes.filter(x => x.id !== id);
+  closeModal('modalNote');
+  renderAll();
+  showToast('Note deleted');
+}
+
+// ── APA BUILDER ──────────────────────────────────
+function normalizeUrl(raw) {
+  if (!raw) return '';
+  let s = raw.trim();
+  // Strip old-style "doi:" or "DOI:" prefixes and bare DOI strings, normalize to https://doi.org/
+  const doiMatch = s.match(/^(?:doi:\s*|https?:\/\/(?:dx\.)?doi\.org\/)?(10\.\d{4,9}\/\S+)$/i);
+  if (doiMatch) return `https://doi.org/${doiMatch[1]}`;
+  if (s && !/^https?:\/\//i.test(s)) s = 'https://' + s;
+  return s;
+}
+
+function toSentenceCase(fieldId) {
+  const el = document.getElementById(fieldId);
+  if (!el || !el.value.trim()) return;
+  const original = el.value;
+  // Words that were originally ALL CAPS (2+ letters) are likely acronyms — preserve them
+  const acronyms = [...new Set(original.match(/\b[A-Z]{2,}\b/g) || [])];
+  let s = original.toLowerCase();
+  s = s.replace(/^\s*([a-z])/, (m, c) => c.toUpperCase());
+  s = s.replace(/([:\u2014-]\s+)([a-z])/g, (m, p1, c) => p1 + c.toUpperCase());
+  acronyms.forEach(acr => {
+    s = s.replace(new RegExp('\\b' + acr.toLowerCase() + '\\b', 'gi'), acr);
+  });
+  el.value = s;
+  buildApa();
+  showToast('Converted — double-check any proper nouns');
+}
+
+function buildApa() {
+  const type = document.getElementById('apaType').value;
+  // Show/hide field groups
+  ['Journal','Book','Chapter','Web','Disser','Report'].forEach(t => {
+    const el = document.getElementById('apa' + t + 'Fields');
+    if (el) el.style.display = 'none';
+  });
+  const showMap = { journal: 'apaJournalFields', book: 'apaBookFields', chapter: 'apaChapterFields', website: 'apaWebFields', dissertation: 'apaDisserFields', report: 'apaReportFields' };
+  const shown = document.getElementById(showMap[type]);
+  if (shown) shown.style.display = 'block';
+  const volWrap = document.getElementById('apaVolumeWrap');
+  if (volWrap) volWrap.style.display = type === 'journal' ? '' : 'none';
+
+  const rawAuthors = (document.getElementById('apaAuthors').value || '').trim().split('\n').map(a => a.trim()).filter(Boolean);
+  const year = document.getElementById('apaYear').value.trim() || 'n.d.';
+  const title = document.getElementById('apaTitle').value.trim();
+
+  function formatAuthorName(raw) {
+    if (!raw.includes(',')) return raw; // organizational author — leave as-is
+    const commaIdx = raw.indexOf(',');
+    const surname = raw.slice(0, commaIdx).trim();
+    const given = raw.slice(commaIdx + 1).trim();
+    if (!given) return surname;
+    const initials = given.split(/\s+/).map(part => {
+      const clean = part.replace(/\.$/, '');
+      if (clean.length <= 1) return clean.toUpperCase() + '.';
+      // Already looks like an initial-with-hyphen (e.g. "J.-P.") — leave alone
+      if (/^[A-Z]\.?-[A-Z]\.?$/i.test(clean)) return clean.toUpperCase().split('-').map(c => c + '.').join('-');
+      return clean[0].toUpperCase() + '.';
+    }).join(' ');
+    return `${surname}, ${initials}`;
+  }
+
+  function fmtAuthors(arr) {
+    arr = arr.map(formatAuthorName);
+    if (!arr.length) return '';
+    if (arr.length === 1) return arr[0];
+    if (arr.length === 2) return arr[0] + ', & ' + arr[1];
+    if (arr.length <= 20) return arr.slice(0,-1).join(', ') + ', & ' + arr[arr.length-1];
+    // APA 7: 21+ authors — list first 19, ellipsis, then final author (no "&")
+    return arr.slice(0,19).join(', ') + ', . . . ' + arr[arr.length-1];
+  }
+
+  const authors = fmtAuthors(rawAuthors);
+  const authorStr = authors ? authors + '. ' : '';
+  const yearStr = `(${year}). `;
+
+  let citation = '';
+
+  if (type === 'journal') {
+    const journal = document.getElementById('apaJournal').value.trim();
+    const vol = document.getElementById('apaVolume').value.trim();
+    const issue = document.getElementById('apaIssue').value.trim();
+    const pages = document.getElementById('apaPages').value.trim();
+    const doi = normalizeUrl(document.getElementById('apaDoi').value.trim());
+    let journalPart = journal ? `<em>${journal}</em>` : '';
+    if (vol) journalPart += `, <em>${vol}</em>`;
+    if (issue) journalPart += `(${issue})`;
+    if (pages) journalPart += `, ${pages}`;
+    citation = `${authorStr}${yearStr}${title ? title + '. ' : ''}${journalPart ? journalPart + '.' : ''}${doi ? ' ' + doi : ''}`;
+  } else if (type === 'book') {
+    const pub = document.getElementById('apaPublisher').value.trim();
+    const ed = document.getElementById('apaEdition').value.trim();
+    const doi = normalizeUrl(document.getElementById('apaBookDoi').value.trim());
+    const titleStr = title ? (ed ? `<em>${title}</em> (${ed} ed.)` : `<em>${title}</em>`) : '';
+    citation = `${authorStr}${yearStr}${titleStr ? titleStr + '.' : ''}${pub ? ' ' + pub + '.' : ''}${doi ? ' ' + doi : ''}`;
+  } else if (type === 'chapter') {
+    const chapTitle = document.getElementById('apaChapterTitle').value.trim();
+    const eds = document.getElementById('apaEditors').value.trim();
+    const bookTitle = document.getElementById('apaBookTitle').value.trim();
+    const chapPages = document.getElementById('apaChapPages').value.trim();
+    const pub = document.getElementById('apaChapPublisher').value.trim();
+    const edStr = eds ? `In ${eds} (Ed${eds.includes('&') ? 's' : ''}.), ` : 'In ';
+    citation = `${authorStr}${yearStr}${chapTitle ? chapTitle + '. ' : ''}${edStr}${bookTitle ? `<em>${bookTitle}</em>` : ''}${chapPages ? ` (${chapPages})` : ''}.${pub ? ' ' + pub + '.' : ''}`;
+  } else if (type === 'website') {
+    const site = document.getElementById('apaSite').value.trim();
+    const url = normalizeUrl(document.getElementById('apaUrl').value.trim());
+    citation = `${authorStr}${yearStr}${title ? `<em>${title}</em>. ` : ''}${site ? site + '.' : ''}${url ? ' ' + url : ''}`;
+  } else if (type === 'dissertation') {
+    const inst = document.getElementById('apaInstitution').value.trim();
+    const db = normalizeUrl(document.getElementById('apaDisserUrl').value.trim());
+    citation = `${authorStr}${yearStr}${title ? `<em>${title}</em>` : ''} [Doctoral dissertation${inst ? ', ' + inst : ''}].${db ? ' ' + db + '.' : ''}`;
+  } else if (type === 'report') {
+    const inst = document.getElementById('apaReportInst').value.trim();
+    const num = document.getElementById('apaReportNum').value.trim();
+    const url = normalizeUrl(document.getElementById('apaReportUrl').value.trim());
+    citation = `${authorStr}${yearStr}${title ? `<em>${title}</em>` : ''}${num ? ` (Report No. ${num})` : ''}.${inst ? ' ' + inst + '.' : ''}${url ? ' ' + url : ''}`;
+  }
+
+  document.getElementById('apaOutput').innerHTML = citation || 'Fill in the fields to generate your citation…';
+}
+
+function copyApa() {
+  const text = document.getElementById('apaOutput').innerText;
+  navigator.clipboard.writeText(text).then(() => showToast('Citation copied!')).catch(() => showToast('Copy failed'));
+}
+
+function clearApa() {
+  ['apaAuthors','apaYear','apaTitle','apaJournal','apaVolume','apaIssue','apaPages','apaDoi',
+   'apaPublisher','apaEdition','apaBookDoi','apaChapterTitle','apaEditors','apaBookTitle','apaChapPages','apaChapPublisher',
+   'apaSite','apaUrl','apaInstitution','apaDisserUrl','apaReportInst','apaReportNum','apaReportUrl'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  buildApa();
+}
+
+async function saveApaToNotes() {
+  const outputEl = document.getElementById('apaOutput');
+  const citation = outputEl.innerHTML;
+  if (!citation || citation.includes('Fill in')) { showToast('Build a citation first'); return; }
+  const data = { title: 'APA Citation', body: citation, tags: 'apa,citation', updated_at: new Date().toISOString() };
+  const r = await sb('POST', 'notes', data);
+  notes.push(r[0]);
+  showToast('Saved to Notes!');
+}
+
+// ── CROSS-COURSE CONNECTIONS ──────────────────────
+function openAddConnection() {
+  const curSem = getViewingSemester();
+  document.getElementById('editConnectionId').value = '';
+  document.getElementById('connectionTitle').value = '';
+  document.getElementById('connectionDesc').value = '';
+  document.getElementById('connectionModalTitle').textContent = 'Add Connection';
+  document.getElementById('deleteConnectionBtn').style.display = 'none';
+  const semCourses = curSem.id ? courses.filter(c => c.semester_id === curSem.id) : courses;
+  document.getElementById('connectionCoursesList').innerHTML = semCourses.map(c => `
+    <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-weight:500;font-size:13px">
+      <input type="checkbox" value="${c.id}" class="connection-course-check" style="width:auto"> ${c.code} — ${c.name}
+    </label>`).join('') || '<span style="font-size:12px;color:var(--text3)">No courses in this semester yet</span>';
+  openModal('modalConnection');
+}
+
+function editConnection(id) {
+  const conn = connections.find(x => x.id === id);
+  if (!conn) return;
+  const selectedIds = (conn.course_ids || '').split(',').filter(Boolean);
+  const sem = semesters.find(s => s.id === conn.semester_id) || {};
+  document.getElementById('editConnectionId').value = id;
+  document.getElementById('connectionTitle').value = conn.title || '';
+  document.getElementById('connectionDesc').value = conn.description || '';
+  document.getElementById('connectionModalTitle').textContent = 'Edit Connection';
+  document.getElementById('deleteConnectionBtn').style.display = 'inline-flex';
+  const semCourses = sem.id ? courses.filter(c => c.semester_id === sem.id) : courses;
+  document.getElementById('connectionCoursesList').innerHTML = semCourses.map(c => `
+    <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-weight:500;font-size:13px">
+      <input type="checkbox" value="${c.id}" class="connection-course-check" style="width:auto" ${selectedIds.includes(c.id) ? 'checked' : ''}> ${c.code} — ${c.name}
+    </label>`).join('');
+  openModal('modalConnection');
+}
+
+async function saveConnection() {
+  const id = document.getElementById('editConnectionId').value;
+  const title = document.getElementById('connectionTitle').value.trim();
+  const checked = [...document.querySelectorAll('.connection-course-check:checked')].map(el => el.value);
+  if (!title) { showToast('Title required'); return; }
+  if (checked.length < 2) { showToast('Pick at least 2 courses'); return; }
+  const firstCourse = courses.find(c => c.id === checked[0]);
+  const data = {
+    title,
+    description: document.getElementById('connectionDesc').value.trim(),
+    course_ids: checked.join(','),
+    semester_id: firstCourse ? firstCourse.semester_id : null
+  };
+  if (id) { await sbPatch('connections', id, data); Object.assign(connections.find(c => c.id === id), data); }
+  else {
+    const sortOrder = connections.length ? Math.max(...connections.map(c => c.sort_order||0)) + 1 : 0;
+    const r = await sb('POST', 'connections', { ...data, sort_order: sortOrder });
+    connections.push(r[0]);
+  }
+  closeModal('modalConnection');
+  renderDashboard();
+  showToast('Saved!');
+}
+
+async function deleteConnection() {
+  const id = document.getElementById('editConnectionId').value;
+  const conn = connections.find(x => x.id === id);
+  if (!id || !conn) return;
+  if (!confirm(`Delete connection "${conn.title}"? This cannot be undone.`)) return;
+  const ok = await sbDelete('connections', id);
+  if (!ok) { showToast('Delete failed'); return; }
+  connections = connections.filter(x => x.id !== id);
+  closeModal('modalConnection');
+  renderDashboard();
+  showToast('Connection deleted');
+}
+
+// ── MANAGE SEMESTERS & COURSES (no SQL needed) ────
+function openManageSemesters() {
+  renderManageSemestersList();
+  openModal('modalManageSemesters');
+}
+
+function renderManageSemestersList() {
+  const sorted = [...semesters].sort((a,b) => new Date(a.start_date||0) - new Date(b.start_date||0));
+  document.getElementById('manageSemestersList').innerHTML = sorted.map(s => {
+    const semCourses = courses.filter(c => c.semester_id === s.id);
+    return `<div class="card" style="margin-bottom:12px">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:8px">
+        <div style="display:flex;align-items:center;gap:8px">
+          <strong style="font-size:14px">${s.name}</strong>
+          ${s.is_current ? '<span class="tag tag-gray" style="font-size:10px">CURRENT</span>' : ''}
+        </div>
+        <div style="display:flex;gap:6px">
+          <button class="btn btn-secondary btn-sm" onclick="openAddCourse('${s.id}')"><i class="ti ti-plus"></i> Course</button>
+          <button class="btn btn-secondary btn-sm btn-icon" onclick="editSemester('${s.id}')"><i class="ti ti-pencil"></i></button>
+        </div>
+      </div>
+      ${semCourses.length ? semCourses.map(c => `
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-top:1px solid var(--border);font-size:12px">
+          <span>${c.code} — ${c.name}</span>
+          <button class="btn btn-secondary btn-sm btn-icon" onclick="editCourse('${c.id}')"><i class="ti ti-pencil"></i></button>
+        </div>
+      `).join('') : '<div style="font-size:12px;color:var(--text3);padding:6px 0;border-top:1px solid var(--border)">No courses yet</div>'}
+    </div>`;
+  }).join('') || '<p style="color:var(--text3);text-align:center;padding:20px">No semesters yet — click "Add Semester" to start.</p>';
+}
+
+function backToManageSemesters() {
+  closeModal('modalSemester');
+  closeModal('modalCourse');
+  openModal('modalManageSemesters');
+  renderManageSemestersList();
+}
+
+function openAddSemester() {
+  document.getElementById('editSemesterId').value = '';
+  document.getElementById('semesterName').value = '';
+  document.getElementById('semesterTerm').value = 'Fall';
+  document.getElementById('semesterYear').value = '';
+  document.getElementById('semesterStart').value = '';
+  document.getElementById('semesterEnd').value = '';
+  document.getElementById('semesterIsCurrent').checked = false;
+  document.getElementById('semesterModalTitle').textContent = 'Add Semester';
+  document.getElementById('deleteSemesterBtn').style.display = 'none';
+  closeModal('modalManageSemesters');
+  openModal('modalSemester');
+}
+
+function editSemester(id) {
+  const s = semesters.find(x => x.id === id);
+  if (!s) return;
+  document.getElementById('editSemesterId').value = id;
+  document.getElementById('semesterName').value = s.name || '';
+  document.getElementById('semesterTerm').value = s.term || 'Fall';
+  document.getElementById('semesterYear').value = s.year || '';
+  document.getElementById('semesterStart').value = s.start_date || '';
+  document.getElementById('semesterEnd').value = s.end_date || '';
+  document.getElementById('semesterIsCurrent').checked = !!s.is_current;
+  document.getElementById('semesterModalTitle').textContent = 'Edit Semester';
+  document.getElementById('deleteSemesterBtn').style.display = 'inline-flex';
+  closeModal('modalManageSemesters');
+  openModal('modalSemester');
+}
+
+async function saveSemester() {
+  const id = document.getElementById('editSemesterId').value;
+  const isCurrent = document.getElementById('semesterIsCurrent').checked;
+  const data = {
+    name: document.getElementById('semesterName').value.trim(),
+    term: document.getElementById('semesterTerm').value,
+    year: parseInt(document.getElementById('semesterYear').value) || null,
+    start_date: document.getElementById('semesterStart').value || null,
+    end_date: document.getElementById('semesterEnd').value || null,
+    is_current: isCurrent
+  };
+  if (!data.name) { showToast('Semester name required'); return; }
+  // Unmark any other semester as current if this one is being set current
+  if (isCurrent) {
+    for (const s of semesters) {
+      if (s.id !== id && s.is_current) {
+        await sbPatch('semesters', s.id, { is_current: false });
+        s.is_current = false;
+      }
+    }
+  }
+  if (id) { await sbPatch('semesters', id, data); Object.assign(semesters.find(s => s.id === id), data); }
+  else { const r = await sb('POST', 'semesters', data); semesters.push(r[0]); }
+  backToManageSemesters();
+  renderSemesterSwitcher();
+  renderAll();
+  showToast('Saved!');
+}
+
+async function deleteSemester() {
+  const id = document.getElementById('editSemesterId').value;
+  const s = semesters.find(x => x.id === id);
+  if (!id || !s) return;
+  const courseCount = courses.filter(c => c.semester_id === id).length;
+  if (!confirm(`Delete "${s.name}"? This will also delete its ${courseCount} course(s) and everything tied to them (assignments, readings). This cannot be undone.`)) return;
+  const semCourseIds = courses.filter(c => c.semester_id === id).map(c => c.id);
+  for (const cid of semCourseIds) {
+    const cAssignments = assignments.filter(a => a.course_id === cid);
+    const cReadings = readings.filter(r => r.course_id === cid);
+    for (const a of cAssignments) await sbDelete('assignments', a.id);
+    for (const r of cReadings) await sbDelete('readings', r.id);
+    await sbDelete('courses', cid);
+  }
+  await sbDelete('semesters', id);
+  assignments = assignments.filter(a => !semCourseIds.includes(a.course_id));
+  readings = readings.filter(r => !semCourseIds.includes(r.course_id));
+  courses = courses.filter(c => c.semester_id !== id);
+  semesters = semesters.filter(s => s.id !== id);
+  closeModal('modalSemester');
+  renderSemesterSwitcher();
+  renderAll();
+  showToast('Semester deleted');
+}
+
+function openAddCourse(semesterId) {
+  document.getElementById('editCourseId').value = '';
+  document.getElementById('editCourseSemesterId').value = semesterId;
+  document.getElementById('courseCode').value = '';
+  document.getElementById('courseName').value = '';
+  document.getElementById('courseCredits').value = '';
+  document.getElementById('courseInstructor').value = '';
+  document.getElementById('courseEmail').value = '';
+  document.getElementById('courseColor').value = 'garnet';
+  document.getElementById('courseModalTitle').textContent = 'Add Course';
+  document.getElementById('deleteCourseBtn').style.display = 'none';
+  closeModal('modalManageSemesters');
+  openModal('modalCourse');
+}
+
+function editCourse(id) {
+  const c = courses.find(x => x.id === id);
+  if (!c) return;
+  document.getElementById('editCourseId').value = id;
+  document.getElementById('editCourseSemesterId').value = c.semester_id;
+  document.getElementById('courseCode').value = c.code || '';
+  document.getElementById('courseName').value = c.name || '';
+  document.getElementById('courseCredits').value = c.credits ?? '';
+  document.getElementById('courseInstructor').value = c.instructor || '';
+  document.getElementById('courseEmail').value = c.email || '';
+  document.getElementById('courseColor').value = c.color || 'garnet';
+  document.getElementById('courseModalTitle').textContent = 'Edit Course';
+  document.getElementById('deleteCourseBtn').style.display = 'inline-flex';
+  closeModal('modalManageSemesters');
+  openModal('modalCourse');
+}
+
+async function saveCourse() {
+  const id = document.getElementById('editCourseId').value;
+  const semesterId = document.getElementById('editCourseSemesterId').value;
+  const data = {
+    code: document.getElementById('courseCode').value.trim(),
+    name: document.getElementById('courseName').value.trim(),
+    credits: parseFloat(document.getElementById('courseCredits').value) || null,
+    instructor: document.getElementById('courseInstructor').value.trim() || null,
+    email: document.getElementById('courseEmail').value.trim() || null,
+    color: document.getElementById('courseColor').value,
+    semester_id: semesterId
+  };
+  if (!data.code || !data.name) { showToast('Course code and name required'); return; }
+  if (id) { await sbPatch('courses', id, data); Object.assign(courses.find(c => c.id === id), data); }
+  else { const r = await sb('POST', 'courses', data); courses.push(r[0]); }
+  backToManageSemesters();
+  renderAll();
+  showToast('Saved!');
+}
+
+async function deleteCourse() {
+  const id = document.getElementById('editCourseId').value;
+  const c = courses.find(x => x.id === id);
+  if (!id || !c) return;
+  const aCount = assignments.filter(a => a.course_id === id).length;
+  const rCount = readings.filter(r => r.course_id === id).length;
+  if (!confirm(`Delete "${c.code} — ${c.name}"? This will also delete its ${aCount} assignment(s) and ${rCount} reading(s). This cannot be undone.`)) return;
+  for (const a of assignments.filter(a => a.course_id === id)) await sbDelete('assignments', a.id);
+  for (const r of readings.filter(r => r.course_id === id)) await sbDelete('readings', r.id);
+  await sbDelete('courses', id);
+  assignments = assignments.filter(a => a.course_id !== id);
+  readings = readings.filter(r => r.course_id !== id);
+  courses = courses.filter(c => c.id !== id);
+  closeModal('modalCourse');
+  renderAll();
+  showToast('Course deleted');
+}
+
+// ── EXPORT ───────────────────────────────────────
+function renderExport() {
+  const curSem = getViewingSemester();
+  document.getElementById('exportTitle').textContent = curSem.name || 'Semester Summary';
+  document.getElementById('exportSubtitle').textContent = 'Generated ' + new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+
+  const semCourses = curSem.id ? courses.filter(c => c.semester_id === curSem.id) : courses;
+  const semCourseIds = new Set(semCourses.map(c => c.id));
+  const semAssignments = assignments.filter(a => semCourseIds.has(a.course_id));
+  const semReadings = readings.filter(r => semCourseIds.has(r.course_id));
+  const semNotes = notes.filter(n => !n.semester_id || n.semester_id === curSem.id);
+
+  const total = semAssignments.length;
+  const done = semAssignments.filter(a => a.completed).length;
+  const totalR = semReadings.length;
+  const readR = semReadings.filter(r => r.is_read).length;
+
+  document.getElementById('exportStats').innerHTML = `
+    <div class="export-stat"><div class="export-stat-num">${done}/${total}</div><div class="export-stat-label">Assignments Done</div></div>
+    <div class="export-stat"><div class="export-stat-num">${readR}/${totalR}</div><div class="export-stat-label">Readings Done</div></div>
+    <div class="export-stat"><div class="export-stat-num">${semNotes.length}</div><div class="export-stat-label">Research Notes</div></div>
+  `;
+
+  document.getElementById('exportCourses').innerHTML = semCourses.map(c => {
+    const cA = assignments.filter(a => a.course_id === c.id);
+    const cDone = cA.filter(a => a.completed).length;
+    return `<div style="margin-bottom:20px">
+      <div style="font-size:14px;font-weight:700;margin-bottom:8px;color:#782F40">${c.code} — ${c.name}</div>
+      <table class="tbl">
+        <thead><tr><th>Assignment</th><th>Due</th><th>Status</th></tr></thead>
+        <tbody>
+          ${cA.map(a => `<tr>
+            <td>${a.name}</td>
+            <td>${a.due_date ? new Date(a.due_date+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'}) : '—'}</td>
+            <td>${a.completed ? '<span class="tag tag-green"><i class="ti ti-check"></i> Done</span>' : '<span class="tag tag-gray">Pending</span>'}</td>
+          </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>`;
+  }).join('');
+}
+
+function downloadExportPDF() {
+  const { jsPDF } = window.jspdf;
+  if (!jsPDF) { showToast('PDF library not loaded yet — try again in a moment'); return; }
+  const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+  const GARNET = [255, 45, 120];
+  const GOLD   = [255, 184, 48];
+  const BLUE   = [0, 201, 167];
+  const DARK   = [30, 28, 24];
+  const GRAY   = [110, 108, 101];
+  const LGRAY  = [220, 218, 214];
+  const pageW  = 210;
+  const margin = 16;
+  const contentW = pageW - 2 * margin;
+  let y = 0;
+
+  function newPage() { doc.addPage(); y = 18; }
+  function checkY(need) { if (y + need > 274) newPage(); }
+
+  // ── HEADER BAND ──
+  doc.setFillColor(...GARNET);
+  doc.rect(0, 0, pageW, 30, 'F');
+  doc.setFillColor(...GOLD);
+  doc.rect(0, 30, pageW, 2, 'F');
+  doc.setTextColor(255, 255, 255);
+  doc.setFont('helvetica', 'bold'); doc.setFontSize(20);
+  doc.text('FSU MSI Dashboard', margin, 14);
+  doc.setFont('helvetica', 'normal'); doc.setFontSize(10);
+  doc.setTextColor(255, 240, 200);
+  const curSem = getViewingSemester();
+  doc.text((curSem.name || 'Semester') + '  ·  Progress Report', margin, 23);
+  doc.setTextColor(255, 220, 180);
+  doc.text('Generated ' + new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' }), pageW - margin, 23, { align: 'right' });
+  y = 38;
+
+  // ── STAT BOXES ──
+  const pdfSemCourses = curSem.id ? courses.filter(c => c.semester_id === curSem.id) : courses;
+  const pdfSemCourseIds = new Set(pdfSemCourses.map(c => c.id));
+  const pdfSemAssignments = assignments.filter(a => pdfSemCourseIds.has(a.course_id));
+  const pdfSemReadings = readings.filter(r => pdfSemCourseIds.has(r.course_id));
+  const pdfSemNotes = notes.filter(n => !n.semester_id || n.semester_id === curSem.id);
+  const totalA = pdfSemAssignments.length;
+  const doneA  = pdfSemAssignments.filter(a => a.completed).length;
+  const totalR = pdfSemReadings.length;
+  const readR  = pdfSemReadings.filter(r => r.is_read).length;
+  const stats  = [
+    [doneA + '/' + totalA, 'Assignments Done'],
+    [readR + '/' + totalR, 'Readings Done'],
+    [pdfSemNotes.length + '', 'Research Notes'],
+  ];
+  const sw = (contentW - 6) / 3;
+  stats.forEach((s, i) => {
+    const sx = margin + i * (sw + 3);
+    doc.setFillColor(248, 244, 240);
+    doc.roundedRect(sx, y, sw, 20, 2, 2, 'F');
+    doc.setDrawColor(...LGRAY); doc.setLineWidth(0.3);
+    doc.roundedRect(sx, y, sw, 20, 2, 2, 'S');
+    doc.setTextColor(...GARNET); doc.setFont('helvetica', 'bold'); doc.setFontSize(17);
+    doc.text(s[0], sx + sw / 2, y + 11, { align: 'center' });
+    doc.setTextColor(...GRAY); doc.setFont('helvetica', 'normal'); doc.setFontSize(7);
+    doc.text(s[1], sx + sw / 2, y + 17, { align: 'center' });
+  });
+  y += 28;
+
+  // ── COURSE SECTIONS ──
+  const semCourses = curSem.id ? courses.filter(c => c.semester_id === curSem.id) : courses;
+  const courseColors = [GARNET, GOLD, BLUE];
+
+  semCourses.forEach((c, ci) => {
+    checkY(22);
+    const col = courseColors[ci] || GARNET;
+    const cA  = assignments.filter(a => a.course_id === c.id);
+    const done = cA.filter(a => a.completed).length;
+
+    // Course header
+    doc.setFillColor(...col);
+    doc.roundedRect(margin, y, contentW, 11, 2, 2, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(11);
+    doc.text(c.code + '  —  ' + c.name, margin + 4, y + 7.5);
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(9);
+    doc.text(done + '/' + cA.length + ' complete', pageW - margin - 4, y + 7.5, { align: 'right' });
+    y += 13;
+
+    // Assignment rows
+    cA.forEach(a => {
+      checkY(8);
+      const bg = a.completed ? [228, 245, 228] : [248, 246, 243];
+      doc.setFillColor(...bg);
+      doc.rect(margin, y, contentW, 7.5, 'F');
+      doc.setDrawColor(...LGRAY); doc.setLineWidth(0.2);
+      doc.rect(margin, y, contentW, 7.5, 'S');
+      // colored left stripe
+      doc.setFillColor(...col);
+      doc.rect(margin, y, 2.5, 7.5, 'F');
+      doc.setTextColor(...DARK);
+      doc.setFont('helvetica', a.completed ? 'italic' : 'normal'); doc.setFontSize(9);
+      const label = (a.completed ? '✓  ' : '   ') + a.name;
+      doc.text(label, margin + 5, y + 5.2, { maxWidth: contentW - 28 });
+      if (a.due_date) {
+        doc.setFont('helvetica', 'normal'); doc.setTextColor(...GRAY); doc.setFontSize(8);
+        const ds = new Date(a.due_date + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        doc.text(ds, pageW - margin - 3, y + 5.2, { align: 'right' });
+      }
+      y += 8;
+    });
+    y += 5;
+  });
+
+  // ── READINGS SUMMARY ──
+  checkY(16);
+  doc.setFillColor(30, 30, 40);
+  doc.roundedRect(margin, y, contentW, 11, 2, 2, 'F');
+  doc.setTextColor(255, 255, 255);
+  doc.setFont('helvetica', 'bold'); doc.setFontSize(11);
+  doc.text('Readings', margin + 4, y + 7.5);
+  doc.setFont('helvetica', 'normal'); doc.setFontSize(9);
+  doc.text(readR + ' of ' + totalR + ' complete', pageW - margin - 4, y + 7.5, { align: 'right' });
+  y += 14;
+
+  const readCols = [GARNET, GOLD, BLUE];
+  semCourses.forEach((c, ci) => {
+    const cReads = readings.filter(r => r.course_id === c.id);
+    if (!cReads.length) return;
+    checkY(10);
+    const col = readCols[ci] || GARNET;
+    doc.setFillColor(...col.map(v => Math.min(255, v + 60)));
+    doc.roundedRect(margin, y, contentW, 8, 1, 1, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(9);
+    doc.text(c.code, margin + 4, y + 5.5);
+    doc.setFont('helvetica', 'normal');
+    const cDone = cReads.filter(r => r.is_read).length;
+    doc.text(cDone + '/' + cReads.length + ' read', pageW - margin - 4, y + 5.5, { align: 'right' });
+    y += 9;
+    cReads.forEach(r => {
+      checkY(8);
+      doc.setFillColor(r.is_read ? 230 : 248, r.is_read ? 245 : 246, r.is_read ? 230 : 248);
+      doc.rect(margin, y, contentW, 7, 'F');
+      doc.setFillColor(...col);
+      doc.rect(margin, y, 2.5, 7, 'F');
+      doc.setTextColor(...DARK);
+      doc.setFont('helvetica', r.is_read ? 'italic' : 'normal'); doc.setFontSize(8.5);
+      doc.text((r.is_read ? '✓  ' : '   ') + r.title, margin + 5, y + 4.8, { maxWidth: contentW - 24 });
+      if (r.week_label) {
+        doc.setTextColor(...GRAY); doc.setFontSize(7.5);
+        doc.text(r.week_label, pageW - margin - 3, y + 4.8, { align: 'right' });
+      }
+      y += 7.5;
+    });
+    y += 4;
+  });
+
+  // ── RESEARCH NOTES ──
+  if (notes.length) {
+    newPage();
+    doc.setFillColor(30, 30, 40);
+    doc.roundedRect(margin, y, contentW, 11, 2, 2, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(11);
+    doc.text('Research Notes', margin + 4, y + 7.5);
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(9);
+    doc.text(notes.length + ' total', pageW - margin - 4, y + 7.5, { align: 'right' });
+    y += 14;
+
+    const sorted = [...notes].sort((a,b) => new Date(b.updated_at||b.created_at) - new Date(a.updated_at||a.created_at));
+    sorted.forEach(n => {
+      const nc = n.course_id ? courseById(n.course_id) : null;
+      const ci = nc ? semCourses.findIndex(c => c.id === nc.id) : -1;
+      const col = ci >= 0 ? courseColors[ci] : [80, 80, 90];
+      const bodyLines = doc.splitTextToSize((n.body || '').replace(/[\r\n]+/g, ' '), contentW - 8);
+      const blockH = 8 + Math.min(bodyLines.length, 6) * 4.5 + (n.tags ? 5 : 0);
+      checkY(blockH + 4);
+
+      doc.setFillColor(250, 248, 245);
+      doc.setDrawColor(...LGRAY); doc.setLineWidth(0.3);
+      doc.roundedRect(margin, y, contentW, blockH, 2, 2, 'FD');
+      doc.setFillColor(...col);
+      doc.roundedRect(margin, y, 3, blockH, 2, 2, 'F');
+
+      // Title line
+      doc.setTextColor(...DARK); doc.setFont('helvetica', 'bold'); doc.setFontSize(10);
+      doc.text(n.title || 'Untitled', margin + 6, y + 5.5, { maxWidth: contentW - 50 });
+
+      // Date + course + module
+      const dt = new Date(n.updated_at || n.created_at);
+      const meta = [
+        nc ? nc.code : '',
+        n.module_label || '',
+        dt.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) + ' ' + dt.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })
+      ].filter(Boolean).join('  ·  ');
+      doc.setFont('helvetica', 'normal'); doc.setTextColor(...GRAY); doc.setFontSize(7.5);
+      doc.text(meta, pageW - margin - 4, y + 5.5, { align: 'right' });
+
+      // Body text
+      doc.setTextColor(...DARK); doc.setFont('helvetica', 'normal'); doc.setFontSize(8.5);
+      const visLines = bodyLines.slice(0, 6);
+      visLines.forEach((line, li) => {
+        doc.text(line, margin + 6, y + 10 + li * 4.5);
+      });
+      if (bodyLines.length > 6) {
+        doc.setTextColor(...GRAY); doc.setFontSize(8);
+        doc.text('…', margin + 6, y + 10 + 6 * 4.5);
+      }
+
+      // Tags
+      if (n.tags) {
+        doc.setTextColor(...GRAY); doc.setFont('helvetica', 'italic'); doc.setFontSize(7.5);
+        doc.text(n.tags, margin + 6, y + blockH - 2);
+      }
+
+      y += blockH + 4;
+    });
+  }
+
+  // ── FOOTERS ──
+  const totalPages = doc.getNumberOfPages();
+  for (let p = 1; p <= totalPages; p++) {
+    doc.setPage(p);
+    doc.setFillColor(...GARNET);
+    doc.rect(0, 287, pageW, 10, 'F');
+    doc.setFillColor(...GOLD);
+    doc.rect(0, 287, pageW, 1.2, 'F');
+    doc.setTextColor(255, 220, 180); doc.setFont('helvetica', 'normal'); doc.setFontSize(7);
+    doc.text('FSU College of Information  ·  MSI Dashboard', margin, 293);
+    doc.text('Page ' + p + ' of ' + totalPages, pageW - margin, 293, { align: 'right' });
+  }
+
+  doc.save('FSU_Progress_' + (curSem.name || 'semester').replace(/\s+/g, '-') + '.pdf');
+  showToast('PDF downloaded!');
+}
+// ── IMPORT READINGS FROM CANVAS ──────────────────
+let importParsed = [];
+
+function openImportReadings() {
+  // Populate course dropdown
+  const sel = document.getElementById('importCourse');
+  sel.innerHTML = courses.map(c => `<option value="${c.id}">${c.code} — ${c.name}</option>`).join('');
+  // Reset to step 1
+  document.getElementById('importText').value = '';
+  document.getElementById('importWeekLabel').value = '';
+  document.getElementById('importStep1').style.display = 'block';
+  document.getElementById('importStep2').style.display = 'none';
+  importParsed = [];
+  openModal('modalImport');
+}
+
+function backToImportStep1() {
+  document.getElementById('importStep1').style.display = 'block';
+  document.getElementById('importStep2').style.display = 'none';
+}
+
+function parseImport() {
+  const raw = document.getElementById('importText').value.trim();
+  if (!raw) { showToast('Paste some text first'); return; }
+
+  const courseId = document.getElementById('importCourse').value;
+  const weekLabel = document.getElementById('importWeekLabel').value.trim();
+
+  // Split into blocks — blank lines separate citations, or treat each non-empty line as a citation
+  // First try splitting on double newlines (paragraph mode)
+  let blocks = raw.split(/\n{2,}/).map(b => b.replace(/\n/g, ' ').trim()).filter(b => b.length > 10);
+  // If that only gives 1 block, try single lines
+  if (blocks.length <= 1) {
+    blocks = raw.split('\n').map(b => b.trim()).filter(b => b.length > 10);
+  }
+
+  importParsed = blocks.map(block => parseCitation(block, courseId, weekLabel));
+
+  if (!importParsed.length) { showToast('No citations detected — try adjusting the text'); return; }
+
+  // Show preview
+  document.getElementById('importCount').textContent = importParsed.length;
+  renderImportPreview();
+  document.getElementById('importStep1').style.display = 'none';
+  document.getElementById('importStep2').style.display = 'block';
+}
+
+function parseCitation(text, courseId, weekLabel) {
+  // Strip leading bullets, numbers, dashes
+  text = text.replace(/^[\s\-•·\*\d]+\.?\s*/, '').trim();
+
+  // Extract URL / DOI
+  let url = null;
+  const doiMatch = text.match(/(?:doi:|https?:\/\/doi\.org\/)([^\s]+)/i);
+  const urlMatch = text.match(/https?:\/\/[^\s]+/);
+  if (doiMatch) {
+    url = 'https://doi.org/' + doiMatch[1].replace(/[.,;)]+$/, '');
+  } else if (urlMatch) {
+    url = urlMatch[0].replace(/[.,;)]+$/, '');
+  }
+
+  // Extract year
+  const yearMatch = text.match(/\((\d{4}[a-z]?)\)/);
+  const year = yearMatch ? yearMatch[1] : null;
+
+  // Try to extract title — text between year/authors and journal name
+  // Pattern: Authors (year). Title. Journal...
+  // OR: Authors (year). Title [link text]. Journal...
+  let title = '';
+  let citation = text;
+
+  // Remove URL from display text for cleaner title extraction
+  const cleanText = text.replace(/https?:\/\/[^\s]+/g, '').replace(/\s+/g, ' ').trim();
+
+  // Try APA pattern: everything after (year). up to the next . that's followed by italic/journal signal
+  // Heuristic: title is between first "). " and the next ". " before volume/journal info
+  const afterYear = yearMatch ? cleanText.slice(cleanText.indexOf(yearMatch[0]) + yearMatch[0].length).replace(/^\.\s*/, '') : cleanText;
+
+  // Title ends at: period before journal (detected by volume pattern, doi, or Eds.)
+  // Signals of journal/book info: volume numbers like 50(1), In Eds., pp., doi:
+  const titleEndPattern = /\.\s+(?=[A-Z][^.]+(?:,\s*\d+|In\s|pp\.\s|\(Eds|doi:))/;
+  const titleEndMatch = afterYear.match(titleEndPattern);
+  if (titleEndMatch) {
+    title = afterYear.slice(0, titleEndMatch.index).trim();
+    // Clean up link artifacts like "↓" or "[PDF]"
+    title = title.replace(/[↓→↑↔]/g, '').replace(/\[PDF\]/gi, '').trim();
+    // Remove trailing period
+    title = title.replace(/\.$/, '').trim();
+  } else {
+    // Fallback: take first sentence after year
+    const firstDot = afterYear.indexOf('. ');
+    title = firstDot > 0 ? afterYear.slice(0, firstDot) : afterYear.slice(0, 120);
+    title = title.replace(/[↓→↑↔]/g, '').replace(/\[PDF\]/gi, '').trim().replace(/\.$/, '');
+  }
+
+  // If title still looks like just authors or is empty, use first 100 chars of clean text
+  if (!title || title.length < 5) {
+    title = cleanText.slice(0, 100).replace(/\.$/, '');
+  }
+
+  // Clean full citation — remove download arrows and other Canvas artifacts
+  citation = text.replace(/[↓→↑↔]/g, '').replace(/\s+/g, ' ').trim();
+
+  return { title, citation, url, courseId, weekLabel, _raw: text };
+}
+
+function renderImportPreview() {
+  const list = document.getElementById('importPreviewList');
+  const c = courses.find(x => x.id === importParsed[0]?.courseId);
+  list.innerHTML = importParsed.map((r, i) => `
+    <div style="padding:12px 14px;border-bottom:1px solid var(--border);${i===importParsed.length-1?'border-bottom:none':''}" id="importRow${i}">
+      <div style="display:flex;align-items:flex-start;gap:10px">
+        <div style="flex:1">
+          <div style="display:flex;gap:6px;align-items:center;margin-bottom:4px;flex-wrap:wrap">
+            <input type="text" value="${escHtml(r.title)}" id="importTitle${i}"
+              style="font-size:13px;font-weight:600;border:none;background:transparent;padding:0;width:100%;color:var(--text)"
+              placeholder="Title" oninput="importParsed[${i}].title=this.value">
+          </div>
+          <div style="font-size:11px;color:var(--text3);line-height:1.5;margin-bottom:4px">${escHtml(r.citation.slice(0,180))}${r.citation.length>180?'…':''}</div>
+          <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+            ${r.weekLabel ? `<span class="tag tag-gray" style="font-size:10px">${escHtml(r.weekLabel)}</span>` : ''}
+            ${r.url ? `<span style="font-size:11px;color:#1e62c2"><i class="ti ti-link" style="font-size:11px"></i> ${escHtml(r.url.slice(0,50))}${r.url.length>50?'…':''}</span>` : ''}
+          </div>
+        </div>
+        <button onclick="removeImportRow(${i})" style="flex-shrink:0;width:24px;height:24px;border-radius:6px;border:none;background:var(--surface2);color:var(--text3);cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center">
+          <i class="ti ti-x"></i>
+        </button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function escHtml(s) {
+  return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function removeImportRow(i) {
+  importParsed.splice(i, 1);
+  document.getElementById('importCount').textContent = importParsed.length;
+  renderImportPreview();
+}
+
+async function confirmImport() {
+  if (!importParsed.length) { showToast('Nothing to add'); return; }
+  let added = 0;
+  for (const r of importParsed) {
+    if (!r.title) continue;
+    const exists = readings.some(x => x.course_id === r.courseId && x.title.toLowerCase().trim() === r.title.toLowerCase().trim());
+    if (exists) continue;
+    const result = await sb('POST', 'readings', {
+      title: r.title,
+      citation: r.citation,
+      url: r.url || null,
+      course_id: r.courseId,
+      week_label: r.weekLabel || null,
+      is_read: false
+    });
+    readings.push(result[0]);
+    added++;
+  }
+  closeModal('modalImport');
+  renderReadings();
+  showToast(added > 0 ? `Added ${added} reading${added!==1?'s':''}!` : 'No new readings — all already existed.');
+}
+
+// ── IMPORT ASSIGNMENTS FROM CANVAS (paste-based — reads what's actually
+// in Canvas, so it can't miss new items or invent phantom ones the way the
+// old SEED-based "sync" could) ──────────────────────────────────────────
+function normalizeName(s) {
+  return (s || '')
+    .toLowerCase()
+    .replace(/[#.,:;'"()\-–—]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+let importAssignParsed = [];
+
+function openImportAssign() {
+  const sel = document.getElementById('importAssignCourse');
+  sel.innerHTML = courses.map(c => `<option value="${c.id}">${c.code} — ${c.name}</option>`).join('');
+  document.getElementById('importAssignText').value = '';
+  document.getElementById('importAssignStep1').style.display = 'block';
+  document.getElementById('importAssignStep2').style.display = 'none';
+  importAssignParsed = [];
+  openModal('modalImportAssign');
+}
+
+function backToImportAssignStep1() {
+  document.getElementById('importAssignStep1').style.display = 'block';
+  document.getElementById('importAssignStep2').style.display = 'none';
+}
+
+function parseAssignImport() {
+  const raw = document.getElementById('importAssignText').value.trim();
+  if (!raw) { showToast('Paste some text first'); return; }
+  const courseId = document.getElementById('importAssignCourse').value;
+
+  // Canvas's Assignments page copy/paste is line-based: a name line,
+  // followed shortly by a "Due <date>[ at <time>] | <weight>/<points> pts"
+  // line. Group lines into blocks, one per assignment, anchored on the
+  // "Due ..." line.
+  const lines = raw.split('\n').map(l => l.trim()).filter(Boolean);
+  const blocks = [];
+  let current = [];
+  for (const line of lines) {
+    current.push(line);
+    if (/\bdue\b/i.test(line) || /\d+\s*pts?\b/i.test(line)) {
+      blocks.push(current);
+      current = [];
+    }
+  }
+  if (current.length) blocks.push(current);
+
+  importAssignParsed = blocks
+    .map(block => parseAssignBlock(block, courseId))
+    .filter(a => a.name);
+
+  if (!importAssignParsed.length) { showToast('No assignments detected — try adjusting the text'); return; }
+
+  // Auto-uncheck anything that already looks like a match in your list
+  importAssignParsed.forEach(a => {
+    const norm = normalizeName(a.name);
+    a._checked = !assignments.some(x => x.course_id === courseId && normalizeName(x.name) === norm);
+  });
+
+  document.getElementById('importAssignCount').textContent = importAssignParsed.length;
+  renderImportAssignPreview();
+  document.getElementById('importAssignStep1').style.display = 'none';
+  document.getElementById('importAssignStep2').style.display = 'block';
+}
+
+function parseAssignBlock(lines, courseId) {
+  const full = lines.join(' ');
+  // name = first line that isn't itself a "Due ..." line
+  let name = lines.find(l => !/^due\b/i.test(l)) || lines[0] || '';
+  name = name.replace(/^[\s\-•·\*\d]+\.?\s*/, '').trim();
+
+  let due_date = null;
+  const dateMatch = full.match(/due\s+([A-Za-z]{3,9})\s+(\d{1,2})/i);
+  if (dateMatch) {
+    const monthNames = ['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'];
+    const mi = monthNames.indexOf(dateMatch[1].slice(0,3).toLowerCase());
+    if (mi > -1) {
+      const day = parseInt(dateMatch[2], 10);
+      const semNow = getViewingSemester();
+      const yearGuess = semNow.start_date ? new Date(semNow.start_date).getFullYear() : new Date().getFullYear();
+      const dt = new Date(yearGuess, mi, day);
+      due_date = dt.toISOString().slice(0, 10);
+    }
+  }
+
+  let points = null;
+  const ptsMatch = full.match(/(\d+(?:\.\d+)?)\s*pts?\b/i);
+  if (ptsMatch) points = parseFloat(ptsMatch[1]);
+
+  let weight = null;
+  const weightMatch = full.match(/(\d+(?:\.\d+)?)\s*%/);
+  if (weightMatch) weight = parseFloat(weightMatch[1]);
+
+  const type = /discussion/i.test(full) ? 'Discussion'
+    : /quiz/i.test(full) ? 'Quiz'
+    : /exam/i.test(full) ? 'Exam'
+    : /presentation/i.test(full) ? 'Presentation'
+    : 'Assignment';
+
+  return { name, due_date, points, weight, type, course_id: courseId, _raw: full };
+}
+
+function renderImportAssignPreview() {
+  const list = document.getElementById('importAssignPreviewList');
+  list.innerHTML = importAssignParsed.map((a, i) => `
+    <div style="padding:12px 14px;border-bottom:1px solid var(--border);${i===importAssignParsed.length-1?'border-bottom:none':''}">
+      <div style="display:flex;align-items:flex-start;gap:10px">
+        <input type="checkbox" ${a._checked ? 'checked' : ''} onchange="importAssignParsed[${i}]._checked=this.checked" style="margin-top:4px">
+        <div style="flex:1">
+          <input type="text" value="${escHtml(a.name)}" style="font-size:13px;font-weight:600;border:none;background:transparent;padding:0;width:100%;color:var(--text)"
+            oninput="importAssignParsed[${i}].name=this.value">
+          <div style="display:flex;gap:10px;align-items:center;margin-top:4px;flex-wrap:wrap">
+            <input type="date" value="${a.due_date || ''}" style="font-size:11px;border:1px solid var(--border);background:transparent;color:var(--text2);border-radius:4px;padding:2px 4px"
+              onchange="importAssignParsed[${i}].due_date=this.value">
+            <input type="number" placeholder="pts" value="${a.points ?? ''}" style="width:60px;font-size:11px;border:1px solid var(--border);background:transparent;color:var(--text2);border-radius:4px;padding:2px 4px"
+              onchange="importAssignParsed[${i}].points=parseFloat(this.value)||null">
+            <span class="tag tag-gray" style="font-size:10px">${escHtml(a.type)}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  `).join('') || '<div style="text-align:center;padding:20px;color:var(--text3)">Nothing to review</div>';
+}
+
+async function confirmAssignImport() {
+  const chosen = importAssignParsed.filter(a => a._checked && a.name);
+  if (!chosen.length) { closeModal('modalImportAssign'); showToast('Nothing added'); return; }
+  let added = 0;
+  for (const a of chosen) {
+    const { _checked, _raw, ...rest } = a;
+    const result = await sb('POST', 'assignments', { ...rest, notes: '', completed: false });
+    assignments.push(result[0]);
+    added++;
+  }
+  closeModal('modalImportAssign');
+  if (currentPage === 'assignments') renderAssignments();
+  if (currentPage === 'today') renderToday();
+  if (currentPage === 'dashboard') renderDashboard();
+  showToast(`Added ${added} new assignment${added !== 1 ? 's' : ''}!`);
+}
+
+// ── SYNC COURSE COLORS ───────────────────────────────
+async function syncCourseColors() {
+  const colorMap = { 'EDF 5492': 'garnet', 'EDG 6362': 'gold', 'EME 6920': 'blue' };
+  for (const c of courses) {
+    const expected = colorMap[c.code];
+    if (expected && c.color !== expected) {
+      await sbPatch('courses', c.id, { color: expected });
+      c.color = expected;
+    }
+  }
+}
+
+// ── STARTUP ──────────────────────────────────────
+(function init() {
+  SB_URL = localStorage.getItem('sb_url') || '';
+  SB_KEY = localStorage.getItem('sb_key') || '';
+  if (SB_URL && SB_KEY) {
+    launch();
+  } else {
+    document.getElementById('setupScreen').style.display = 'flex';
+    initDark();
+    initFontPrefs();
+  }
+})();
+</script>
+</body>
+</html>
