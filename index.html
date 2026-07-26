@@ -1628,7 +1628,11 @@ function renderToday() {
   if (next) {
     const days = daysUntil(next.due_date);
     const c = courseById(next.course_id);
-    const color = days < 0 ? 'var(--pink)' : days <= 2 ? (isLight ? '#425563' : '#5CB8B2') : 'var(--teal)';
+    const color = days < 0
+      ? (isLight ? '#782F40' : '#FF8A80')
+      : days <= 2
+        ? (isLight ? '#425563' : '#5CB8B2')
+        : (isLight ? '#241016' : 'rgba(255,255,255,0.92)');
     const label = days < 0 ? `${Math.abs(days)}d overdue` : days === 0 ? 'due today' : days === 1 ? 'due tomorrow' : `${days} days`;
     cdEl.innerHTML = `
       <div style="font-family:'Barlow Condensed',sans-serif;font-size:42px;font-weight:800;color:${color};line-height:1">${days < 0 ? '-' : ''}${Math.abs(days)}<span style="font-size:18px;font-weight:600;margin-left:4px">${days === 0 ? 'today' : 'd'}</span></div>
