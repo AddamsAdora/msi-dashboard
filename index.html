@@ -2167,6 +2167,10 @@ function inferReadingDueDate(courseId, weekLabel) {
   return matches.sort((a, b) => new Date(b.due_date) - new Date(a.due_date))[0].due_date;
 }
 
+function readingLinkIcon(url) {
+  return 'ti-cloud';
+}
+
 function renderReadings() {
   const curSem = getViewingSemester();
   const semCourses = curSem.id ? courses.filter(c => c.semester_id === curSem.id) : courses;
@@ -2240,7 +2244,7 @@ function renderReadings() {
           <i class="ti ti-grip-vertical drag-handle" style="margin-top:4px"></i>
           <div class="check-circle ${rCheckClass}" onclick="toggleReading('${r.id}')" style="margin-top:2px"></div>
           <div class="reading-text">
-            <div class="reading-title">${r.title}${r.url ? ` <a href="${r.url}" target="_blank" style="font-size:11px;color:var(--garnet);margin-left:6px"><i class="ti ti-external-link"></i></a>` : ''}</div>
+            <div class="reading-title">${r.title}${r.url ? ` <a href="${r.url}" target="_blank" style="font-size:11px;color:var(--garnet);margin-left:6px" title="${r.url}"><i class="ti ${readingLinkIcon(r.url)}"></i></a>` : ''}</div>
             ${r.citation ? `<div class="reading-citation">${r.citation}</div>` : ''}
           </div>
           <button class="btn btn-secondary btn-sm btn-icon" onclick="editReading('${r.id}')"><i class="ti ti-pencil"></i></button>
@@ -2271,7 +2275,7 @@ function renderReadings() {
         cRows += `<div class="reading-row" style="opacity:.55">
           <div class="check-circle done ${rCheckClass}" onclick="toggleReading('${r.id}')" style="margin-top:2px"></div>
           <div class="reading-text">
-            <div class="reading-title" style="text-decoration:line-through">${r.title}${r.url ? ` <a href="${r.url}" target="_blank" style="font-size:11px;color:var(--garnet);margin-left:6px;text-decoration:none" onclick="event.stopPropagation()"><i class="ti ti-external-link"></i></a>` : ''}</div>
+            <div class="reading-title" style="text-decoration:line-through">${r.title}${r.url ? ` <a href="${r.url}" target="_blank" style="font-size:11px;color:var(--garnet);margin-left:6px;text-decoration:none" onclick="event.stopPropagation()" title="${r.url}"><i class="ti ${readingLinkIcon(r.url)}"></i></a>` : ''}</div>
             ${r.week_label ? `<div class="reading-citation">${r.week_label}</div>` : ''}
           </div>
           <button class="btn btn-secondary btn-sm btn-icon" onclick="editReading('${r.id}')"><i class="ti ti-pencil"></i></button>
