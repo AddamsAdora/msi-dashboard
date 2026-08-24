@@ -141,7 +141,7 @@ body::before {
 }
 .dark-btn:hover { background: var(--surface2); color: var(--text); }
 .hamburger {
-  display: flex; width: 34px; height: 34px; border-radius: var(--radius-sm);
+  display: none; width: 34px; height: 34px; border-radius: var(--radius-sm);
   border: 1px solid var(--border); cursor: pointer;
   background: var(--surface); color: var(--text2);
   align-items: center; justify-content: center; font-size: 19px;
@@ -155,7 +155,6 @@ body::before {
   background: linear-gradient(180deg, #12070a 0%, #572932 100%); border-right: 1px solid rgba(255,255,255,0.1);
   z-index: 310; transition: left .25s cubic-bezier(.19,1,.22,1);
   display: flex; flex-direction: column; padding: 20px 0;
-  overflow-y: auto;
 }
 .drawer.open { left: 0; }
 .drawer-close { margin: 0 16px 16px; align-self: flex-start; width: 34px; height: 34px; border-radius: var(--radius-sm); border: 1px solid var(--border); cursor: pointer; background: var(--surface); color: var(--text2); font-size: 17px; display: flex; align-items: center; justify-content: center; }
@@ -165,12 +164,6 @@ body::before {
 .drawer-links a i { font-size: 17px; }
 .drawer-sep { height: 1px; background: var(--border); margin: 10px 20px; }
 .drawer-dark { display: flex; align-items: center; gap: 10px; padding: 11px 20px; color: var(--text2); font-size: 14px; font-weight: 500; }
-.drawer-display { padding: 4px 20px 16px; }
-.drawer-display-label { font-size: 11px; font-weight: 700; color: rgba(255,255,255,0.55); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 10px; }
-.drawer-select-label { display: block; font-size: 12px; color: rgba(255,255,255,0.7); margin-bottom: 4px; }
-.drawer-select { width: 100%; padding: 6px 8px; font-size: 12px; border-radius: var(--radius-sm); background: rgba(255,255,255,0.1); color: #fff; border: 1px solid rgba(255,255,255,0.25); }
-.drawer-select option { background: #2b1119; color: #fff; }
-.drawer-connection-note { font-size: 11px; color: rgba(255,255,255,0.55); margin-top: 8px; line-height: 1.4; }
 .toggle-switch { position: relative; width: 40px; height: 22px; margin-left: auto; }
 .toggle-switch input { opacity: 0; width: 0; height: 0; }
 .toggle-track { position: absolute; inset: 0; border-radius: 11px; background: var(--surface3); cursor: pointer; transition: background .2s; }
@@ -336,6 +329,7 @@ option { background: #180b0f; }
 .form-row { display: grid; gap: 12px; margin-bottom: 12px; }
 .form-row.cols2 { grid-template-columns: 1fr 1fr; }
 .form-row.cols3 { grid-template-columns: 1fr 1fr 1fr; }
+.form-row.cols4 { grid-template-columns: 1fr 1fr 1fr 1fr; }
 label { font-size: 11px; font-weight: 700; color: var(--text3); display: block; margin-bottom: 4px; text-transform: uppercase; letter-spacing: .5px; }
 
 /* ── MODAL ── */
@@ -471,6 +465,15 @@ label { font-size: 11px; font-weight: 700; color: var(--text3); display: block; 
 .completed-row td { opacity: .45; }
 .completed-row td .dl-name { text-decoration: line-through; }
 
+/* ── IMPORTANT ASSIGNMENT HIGHLIGHT ── */
+/* Deliberately a different accent from "due today" (gold/garnet) so the
+   two signals never blur together — Westcott Water in dark mode, Legacy
+   Blue in light mode. */
+.important-star { color: #5CB8B2; font-size: 13px; margin-left: 5px; vertical-align: middle; }
+[data-theme="light"] .important-star { color: #425563; }
+.tbl tr.important-assign td:nth-child(2) { border-left: 3px solid #5CB8B2; }
+[data-theme="light"] .tbl tr.important-assign td:nth-child(2) { border-left-color: #425563; }
+
 /* ── TOAST ── */
 .toast {
   position: fixed;
@@ -531,11 +534,6 @@ label { font-size: 11px; font-weight: 700; color: var(--text3); display: block; 
 }
 [data-theme="light"] .drawer-links a,
 [data-theme="light"] .drawer-dark { color: rgba(36,16,22,0.78); }
-[data-theme="light"] .drawer-display-label { color: rgba(36,16,22,0.7); }
-[data-theme="light"] .drawer-select-label { color: rgba(36,16,22,0.7); }
-[data-theme="light"] .drawer-select { background: rgba(255,255,255,0.5); color: #241016; border-color: rgba(87,41,50,0.3); }
-[data-theme="light"] .drawer-select option { background: #fff; color: #241016; }
-[data-theme="light"] .drawer-connection-note { color: rgba(36,16,22,0.6); }
 [data-theme="light"] .drawer-links a:hover,
 [data-theme="light"] .drawer-links a.active { background: rgba(120,47,64,0.85); color: #fff; }
 [data-theme="light"] .topnav-title { color: #241016; }
@@ -591,6 +589,7 @@ label { font-size: 11px; font-weight: 700; color: var(--text3); display: block; 
 [data-theme="light"] .tag-gold { background: rgba(184,135,46,0.2); color: #6b4e12; border-color: rgba(184,135,46,0.48); }
 [data-theme="light"] .tag-blue { background: rgba(66,85,99,0.14); color: #2e3943; border-color: rgba(66,85,99,0.4); }
 [data-theme="light"] .tag-gray { background: rgba(87,41,50,0.07); color: rgba(36,16,22,0.6); border-color: rgba(87,41,50,0.14); }
+[data-theme="light"] .tag-green { background: rgba(34,197,94,0.14); color: #15803d; border-color: rgba(34,197,94,0.35); }
 [data-theme="light"] .float-note,
 [data-theme="light"] #floatNoteBtn {
   background: linear-gradient(135deg, #782F40, #CEB888) !important;
@@ -609,6 +608,7 @@ label { font-size: 11px; font-weight: 700; color: var(--text3); display: block; 
   .export-grid { grid-template-columns: 1fr 1fr; }
   .form-row.cols2 { grid-template-columns: 1fr; }
   .form-row.cols3 { grid-template-columns: 1fr; }
+  .form-row.cols4 { grid-template-columns: 1fr 1fr; }
 }
 @media (max-width: 480px) {
   .main { padding: 16px 14px 60px; }
@@ -699,11 +699,11 @@ label { font-size: 11px; font-weight: 700; color: var(--text3); display: block; 
     </label>
   </div>
   <div class="drawer-sep"></div>
-  <div class="drawer-display">
-    <div class="drawer-display-label">Display</div>
+  <div style="padding:4px 20px 16px">
+    <div style="font-size:11px;font-weight:700;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">Display</div>
     <div style="margin-bottom:10px">
-      <label class="drawer-select-label">Font size</label>
-      <select id="fontSizeSelect" class="drawer-select" onchange="setFontScale(this.value)">
+      <label style="display:block;font-size:12px;color:rgba(255,255,255,0.6);margin-bottom:4px">Font size</label>
+      <select id="fontSizeSelect" onchange="setFontScale(this.value)" style="width:100%;padding:6px 8px;font-size:12px;border-radius:var(--radius-sm);background:rgba(255,255,255,0.06);color:#fff;border:1px solid rgba(255,255,255,0.14)">
         <option value="0.9">Small</option>
         <option value="1">Default</option>
         <option value="1.15">Large</option>
@@ -711,8 +711,8 @@ label { font-size: 11px; font-weight: 700; color: var(--text3); display: block; 
       </select>
     </div>
     <div>
-      <label class="drawer-select-label">Font face</label>
-      <select id="fontFaceSelect" class="drawer-select" onchange="setFontFace(this.value)">
+      <label style="display:block;font-size:12px;color:rgba(255,255,255,0.6);margin-bottom:4px">Font face</label>
+      <select id="fontFaceSelect" onchange="setFontFace(this.value)" style="width:100%;padding:6px 8px;font-size:12px;border-radius:var(--radius-sm);background:rgba(255,255,255,0.06);color:#fff;border:1px solid rgba(255,255,255,0.14)">
         <option value="'Barlow', sans-serif">Barlow (default)</option>
         <option value="'Atkinson Hyperlegible', sans-serif">Atkinson Hyperlegible</option>
         <option value="Georgia, 'Times New Roman', serif">Serif (Georgia)</option>
@@ -720,12 +720,6 @@ label { font-size: 11px; font-weight: 700; color: var(--text3); display: block; 
         <option value="system-ui, -apple-system, sans-serif">System Default</option>
       </select>
     </div>
-  </div>
-  <div class="drawer-sep"></div>
-  <div class="drawer-display">
-    <div class="drawer-display-label">Connection</div>
-    <button class="btn btn-secondary btn-sm" style="width:100%;justify-content:center" onclick="resetConnection()"><i class="ti ti-plug-connected-x"></i> Disconnect / Re-enter Setup</button>
-    <p class="drawer-connection-note">Clears your saved Project URL and key from this browser and takes you back to the setup screen. Your data in Supabase is not affected.</p>
   </div>
 </div>
 
@@ -1048,8 +1042,9 @@ label { font-size: 11px; font-weight: 700; color: var(--text3); display: block; 
         </select>
       </div>
     </div>
-    <div class="form-row cols3">
+    <div class="form-row cols4">
       <div><label>Due Date</label><input type="date" id="assignDue"></div>
+      <div><label>Due Time (optional)</label><input type="time" id="assignDueTime"></div>
       <div><label>Weight (%)</label><input type="number" id="assignWeight" placeholder="20"></div>
       <div><label>Points</label><input type="number" id="assignPoints" placeholder="100"></div>
     </div>
@@ -1062,7 +1057,12 @@ label { font-size: 11px; font-weight: 700; color: var(--text3); display: block; 
         <input type="checkbox" id="assignOptional" style="width:auto">
         Optional (not required)
       </label>
+      <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-weight:500;margin-top:8px">
+        <input type="checkbox" id="assignImportant" style="width:auto">
+        <i class="ti ti-star-filled" style="font-size:13px;color:#425563"></i> Mark as Important (heavily weighted, high stakes)
+      </label>
     </div>
+    <div class="form-row"><div><label>Required responses (optional — for discussions needing multiple replies)</label><input type="number" id="assignResponsesRequired" placeholder="e.g. 3" min="0" style="width:100px"></div></div>
     <div class="form-row"><div><label>Notes (optional)</label><textarea id="assignNotes" rows="2"></textarea></div></div>
     <div class="modal-footer">
       <button class="btn btn-secondary" id="deleteAssignBtn" onclick="deleteAssignment()" style="display:none;margin-right:auto;color:#ef4444;border-color:rgba(239,68,68,.4)"><i class="ti ti-trash"></i> Delete</button>
@@ -1389,7 +1389,6 @@ async function sbGet(table, params='') {
   const res = await fetch(`${SB_URL}/rest/v1/${table}?${params}&order=created_at.asc`, {
     headers: { 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}` }
   });
-  if (!res.ok) { const e = await res.text().catch(() => ''); throw new Error(e || `Request to ${table} failed (${res.status})`); }
   return res.json();
 }
 async function sbPatch(table, id, body) {
@@ -1408,40 +1407,12 @@ async function connectSupabase() {
   SB_URL = document.getElementById('sbUrl').value.trim().replace(/\/$/, '');
   SB_KEY = document.getElementById('sbKey').value.trim();
   if (!SB_URL || !SB_KEY) { showToast('Please fill in both fields'); return; }
-  if (!/^https:\/\/.+\.supabase\.co$/.test(SB_URL)) {
-    showToast('That URL doesn\'t look right — it should look like https://xxxxx.supabase.co with nothing after it');
-    return;
-  }
-  let res;
   try {
-    res = await fetch(`${SB_URL}/rest/v1/semesters?limit=1`, {
-      headers: { 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}` }
-    });
-  } catch (e) {
-    showToast('Couldn\'t reach that URL — double check it\'s typed correctly, with no extra spaces or slashes');
-    return;
-  }
-  if (res.status === 401 || res.status === 403) {
-    showToast('That key was rejected — make sure you copied the anon public key (not service_role), with no extra characters');
-    return;
-  }
-  if (res.status === 404) {
-    showToast('Connected, but the "semesters" table doesn\'t exist yet — run MSI Dashboard Schema.sql in this project\'s SQL Editor first');
-    return;
-  }
-  if (!res.ok) {
-    const detail = await res.text().catch(() => '');
-    showToast('Connection failed (' + res.status + ') — ' + (detail || 'check your URL and key'));
-    return;
-  }
-  localStorage.setItem('sb_url', SB_URL);
-  localStorage.setItem('sb_key', SB_KEY);
-  try {
+    await sbGet('semesters', 'limit=1');
+    localStorage.setItem('sb_url', SB_URL);
+    localStorage.setItem('sb_key', SB_KEY);
     await launch();
-  } catch (e) {
-    showToast('Connected, but something went wrong loading your data — try refreshing the page');
-    console.error(e);
-  }
+  } catch(e) { showToast('Connection failed — check your URL and key'); }
 }
 
 async function launch() {
@@ -1513,13 +1484,6 @@ function setFontFace(face) {
   localStorage.setItem('fontFace', face);
 }
 
-function resetConnection() {
-  if (!confirm('Disconnect from this Supabase project? You will need to re-enter your Project URL and anon key next time — nothing in Supabase itself is deleted.')) return;
-  localStorage.removeItem('sb_url');
-  localStorage.removeItem('sb_key');
-  location.reload();
-}
-
 // ── NAV ──────────────────────────────────────────
 function nav(page) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -1555,38 +1519,7 @@ function enableDragReorder(containerId, itemSelector, table, dataArrayName, afte
   if (!container) return;
   let dragEl = null;
 
-  container.querySelectorAll(itemSelector).forEach(el => {
-    const handle = el.querySelector('.drag-handle');
-    if (!handle) return;
-    handle.setAttribute('draggable', 'true');
-    handle.addEventListener('dragstart', (e) => {
-      dragEl = el;
-      el.classList.add('dragging');
-      e.dataTransfer.effectAllowed = 'move';
-    });
-    handle.addEventListener('dragend', () => {
-      el.classList.remove('dragging');
-      dragEl = null;
-    });
-  });
-
-  container.ondragover = (e) => {
-    e.preventDefault();
-    if (!dragEl) return;
-    const siblings = [...container.querySelectorAll(`${itemSelector}:not(.dragging)`)];
-    const after = siblings.reduce((closest, child) => {
-      const box = child.getBoundingClientRect();
-      const offset = e.clientY - box.top - box.height / 2;
-      if (offset < 0 && offset > closest.offset) return { offset, element: child };
-      return closest;
-    }, { offset: -Infinity, element: null }).element;
-    if (after == null) container.appendChild(dragEl);
-    else container.insertBefore(dragEl, after);
-  };
-
-  container.ondrop = async (e) => {
-    e.preventDefault();
-    if (!dragEl) return;
+  async function finalize() {
     const items = [...container.querySelectorAll(itemSelector)];
     const dataArr = getReorderableArray(dataArrayName);
     for (let i = 0; i < items.length; i++) {
@@ -1598,7 +1531,42 @@ function enableDragReorder(containerId, itemSelector, table, dataArrayName, afte
       }
     }
     if (afterReorder) afterReorder();
-  };
+  }
+
+  container.querySelectorAll(itemSelector).forEach(el => {
+    const handle = el.querySelector('.drag-handle');
+    if (!handle) return;
+    handle.style.touchAction = 'none';
+
+    handle.addEventListener('pointerdown', (e) => {
+      dragEl = el;
+      el.classList.add('dragging');
+      try { handle.setPointerCapture(e.pointerId); } catch (err) {}
+      e.preventDefault();
+    });
+
+    handle.addEventListener('pointermove', (e) => {
+      if (!dragEl) return;
+      const siblings = [...container.querySelectorAll(`${itemSelector}:not(.dragging)`)];
+      const after = siblings.reduce((closest, child) => {
+        const box = child.getBoundingClientRect();
+        const offset = e.clientY - box.top - box.height / 2;
+        if (offset < 0 && offset > closest.offset) return { offset, element: child };
+        return closest;
+      }, { offset: -Infinity, element: null }).element;
+      if (after == null) container.appendChild(dragEl);
+      else container.insertBefore(dragEl, after);
+    });
+
+    const endDrag = async () => {
+      if (!dragEl) return;
+      dragEl.classList.remove('dragging');
+      dragEl = null;
+      await finalize();
+    };
+    handle.addEventListener('pointerup', endDrag);
+    handle.addEventListener('pointercancel', endDrag);
+  });
 }
 function getReorderableArray(name) {
   if (name === 'assignments') return assignments;
@@ -1627,6 +1595,17 @@ function fmtDate(d) {
   if (!d) return '—';
   const dt = new Date(d + 'T12:00:00');
   return dt.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+}
+function fmtTime(t) {
+  if (!t) return '';
+  const [h, m] = t.split(':').map(Number);
+  const period = h >= 12 ? 'PM' : 'AM';
+  const h12 = h % 12 === 0 ? 12 : h % 12;
+  return `${h12}:${String(m).padStart(2,'0')} ${period}`;
+}
+function fmtDateTime(d, t) {
+  if (!d) return '—';
+  return fmtDate(d) + (t ? `, ${fmtTime(t)}` : '');
 }
 function daysUntil(d) {
   if (!d) return null;
@@ -1712,7 +1691,7 @@ function renderToday() {
     const isSoon = days >= 0 && days <= 2;
     const iconType = isOverdue ? 'red' : isSoon ? 'amber' : 'blue';
     const icon = isOverdue ? 'ti-alert-triangle' : isSoon ? 'ti-clock' : 'ti-calendar';
-    const dueStr = isOverdue ? `${Math.abs(days)}d overdue` : days === 0 ? 'Due today' : days === 1 ? 'Due tomorrow' : `Due ${fmtDate(a.due_date)}`;
+    const dueStr = isOverdue ? `${Math.abs(days)}d overdue` : days === 0 ? 'Due today' : days === 1 ? 'Due tomorrow' : `Due ${fmtDateTime(a.due_date, a.due_time)}`;
     const dueTodayCls = days === 0 ? ' due-today' : '';
     nextHtml += `<div class="focus-item${dueTodayCls}" style="cursor:pointer" onclick="nav('assignments')">
       <div class="focus-icon ${iconType}"><i class="ti ${icon}"></i></div>
@@ -1811,7 +1790,7 @@ function renderToday() {
     qHtml += `<div class="reading-row" style="padding:10px 18px;cursor:pointer" onclick="toggleReadingById('${r.id}')">
       <div class="check-circle ${r.code ? 'cc-' + r.code : ''}" style="flex-shrink:0;margin-top:1px"></div>
       <div class="reading-text" style="flex:1">
-        <div class="reading-title" style="font-size:13px">${r.title}${r.url ? ` <a href="${r.url}" target="_blank" style="font-size:11px;color:var(--garnet);margin-left:4px" onclick="event.stopPropagation()" title="${r.url}"><i class="ti ${readingLinkIcon(r.url)}"></i></a>` : ''}</div>
+        <div class="reading-title" style="font-size:13px">${r.title}${r.url ? ` <a href="${r.url}" target="_blank" style="font-size:11px;color:var(--pink);margin-left:4px" onclick="event.stopPropagation()" title="${r.url}"><i class="ti ti-cloud"></i></a>` : ''}</div>
         <div style="display:flex;align-items:center;gap:6px;margin-top:3px">
           ${courseTag(c)}
           ${r.week_label ? `<span style="font-size:10px;color:var(--text3)">${r.week_label}</span>` : ''}
@@ -1938,7 +1917,7 @@ function renderDashboard() {
     const dot = urgencyDot(a.due_date);
     const dotColor = c.color === 'gold' ? '#CEB888' : c.color === 'blue' ? '#5f7d89' : '#782F40';
     const dueTodayCls = isDueToday(a.due_date) ? ' due-today' : '';
-    return `<div class="deadline-item${dueTodayCls}"><div class="dl-dot"></div><span class="dl-name">${a.name}</span>${courseTag(c)}<span class="dl-meta">${fmtDate(a.due_date)}</span></div>`.replace('class="dl-dot"', `class="dl-dot" style="background:${dotColor}"`);
+    return `<div class="deadline-item${dueTodayCls}"><div class="dl-dot"></div><span class="dl-name">${a.name}</span>${courseTag(c)}<span class="dl-meta">${fmtDateTime(a.due_date, a.due_time)}</span></div>`.replace('class="dl-dot"', `class="dl-dot" style="background:${dotColor}"`);
   }).join('') || '<p style="color:var(--text3);font-size:13px;padding:8px 0">No upcoming deadlines</p>';
   document.getElementById('upcomingDeadlines').innerHTML = dlHtml;
 
@@ -2008,20 +1987,34 @@ function renderAssignments() {
     return a.weight ? a.weight + '%' : '—';
   }
 
+  function responseDots(a) {
+    const total = a.responses_required;
+    const done = a.responses_done || 0;
+    let dots = '';
+    for (let i = 1; i <= total; i++) {
+      dots += `<div class="check-circle ${i <= done ? 'done' : ''}" style="width:16px;height:16px;display:inline-flex" onclick="toggleResponseDot('${a.id}', ${i}, event)" title="Response ${i}"></div>`;
+    }
+    return `<div style="display:flex;gap:3px">${dots}</div>`;
+  }
+
   function assignRow(a) {
     const c = courseById(a.course_id);
     const hasNotes = !!(a.notes && a.notes.trim()) || notes.some(n => n.assignment_id === a.id);
     const dueTodayCls = (!a.completed && isDueToday(a.due_date)) ? 'due-today' : '';
-    return `<tr class="${dueTodayCls}" data-id="${a.id}">
+    const importantCls = a.is_important ? 'important-assign' : '';
+    const hasResponses = a.responses_required > 0;
+    return `<tr class="${dueTodayCls} ${importantCls}" data-id="${a.id}">
       <td>${a.completed ? '' : '<i class="ti ti-grip-vertical drag-handle"></i>'}</td>
-      <td><div class="check-circle ${a.completed ? 'done' : ''}" onclick="toggleAssign('${a.id}')"></div></td>
+      <td>${hasResponses ? responseDots(a) : `<div class="check-circle ${a.completed ? 'done' : ''}" onclick="toggleAssign('${a.id}', event)"></div>`}</td>
       <td>
         <span class="dl-name" style="cursor:pointer;${a.completed ? 'opacity:.55;text-decoration:line-through' : ''}" onclick="openAssignmentNotes('${a.id}')">${a.name}</span>
+        ${a.is_important ? `<i class="ti ti-star-filled important-star" title="Marked important"></i>` : ''}
         ${a.optional ? `<span class="tag tag-gray" style="font-size:9px;margin-left:5px;vertical-align:middle">OPTIONAL</span>` : ''}
+        ${hasResponses ? `<span class="tag tag-gray" style="font-size:9px;margin-left:5px;vertical-align:middle">${a.responses_done||0}/${a.responses_required} responses</span>` : ''}
         ${hasNotes ? `<i class="ti ti-notes" title="Has notes" style="font-size:12px;color:var(--text3);margin-left:5px;cursor:pointer" onclick="openAssignmentNotes('${a.id}')"></i>` : ''}
       </td>
       <td class="hide-mobile">${courseTag(c)}</td>
-      <td class="hide-mobile" style="${a.completed ? 'opacity:.55' : ''}">${fmtDate(a.due_date)}</td>
+      <td class="hide-mobile" style="${a.completed ? 'opacity:.55' : ''}">${fmtDateTime(a.due_date, a.due_time)}</td>
       <td class="hide-mobile" style="${a.completed ? 'opacity:.55' : ''}">${unitCell(a)}</td>
       <td><button class="btn btn-secondary btn-sm btn-icon" onclick="editAssignment('${a.id}')"><i class="ti ti-pencil"></i></button></td>
     </tr>`;
@@ -2051,11 +2044,24 @@ function toggleCompletedVisible() {
 
 function setAssignFilter(f) { currentCourseFilter = f === 'All' ? 'all' : f; renderAssignments(); }
 
-async function toggleAssign(id) {
+async function toggleAssign(id, event) {
   const a = assignments.find(x => x.id === id);
   if (!a) return;
   a.completed = !a.completed;
   await sbPatch('assignments', id, { completed: a.completed });
+  renderAssignments();
+  if (currentPage === 'dashboard') renderDashboard();
+  if (currentPage === 'today') renderToday();
+}
+
+async function toggleResponseDot(id, clickedIndex, event) {
+  const a = assignments.find(x => x.id === id);
+  if (!a) return;
+  const current = a.responses_done || 0;
+  const newDone = clickedIndex <= current ? clickedIndex - 1 : clickedIndex;
+  a.responses_done = newDone;
+  a.completed = newDone >= a.responses_required;
+  await sbPatch('assignments', id, { responses_done: newDone, completed: a.completed });
   renderAssignments();
   if (currentPage === 'dashboard') renderDashboard();
   if (currentPage === 'today') renderToday();
@@ -2072,16 +2078,21 @@ function openAddAssignment() {
   document.getElementById('editAssignId').value = '';
   document.getElementById('assignName').value = '';
   document.getElementById('assignDue').value = '';
+  document.getElementById('assignDueTime').value = '';
   document.getElementById('assignWeight').value = '';
   document.getElementById('assignPoints').value = '';
   document.getElementById('assignNotes').value = '';
   document.getElementById('assignPassFail').checked = false;
   document.getElementById('assignOptional').checked = false;
+  document.getElementById('assignImportant').checked = false;
+  document.getElementById('assignResponsesRequired').value = '';
   toggleAssignPassFailUI();
   document.getElementById('assignModalTitle').textContent = 'Add Assignment';
   document.getElementById('deleteAssignBtn').style.display = 'none';
   const sel = document.getElementById('assignCourse');
-  sel.innerHTML = courses.map(c => `<option value="${c.id}">${c.code}</option>`).join('');
+  const curSem = getViewingSemester();
+  const semCourses = curSem.id ? courses.filter(c => c.semester_id === curSem.id) : courses;
+  sel.innerHTML = semCourses.map(c => `<option value="${c.id}">${c.code}</option>`).join('');
   openModal('modalAssignment');
 }
 
@@ -2091,16 +2102,21 @@ function editAssignment(id) {
   document.getElementById('editAssignId').value = id;
   document.getElementById('assignName').value = a.name;
   document.getElementById('assignDue').value = a.due_date || '';
+  document.getElementById('assignDueTime').value = a.due_time || '';
   document.getElementById('assignWeight').value = a.weight || '';
   document.getElementById('assignPoints').value = a.points || '';
   document.getElementById('assignNotes').value = a.notes || '';
   document.getElementById('assignPassFail').checked = !!a.pass_fail;
   document.getElementById('assignOptional').checked = !!a.optional;
+  document.getElementById('assignImportant').checked = !!a.is_important;
+  document.getElementById('assignResponsesRequired').value = a.responses_required ?? '';
   toggleAssignPassFailUI();
   document.getElementById('assignModalTitle').textContent = 'Edit Assignment';
   document.getElementById('deleteAssignBtn').style.display = 'inline-flex';
   const sel = document.getElementById('assignCourse');
-  sel.innerHTML = courses.map(c => `<option value="${c.id}" ${c.id === a.course_id ? 'selected' : ''}>${c.code}</option>`).join('');
+  const curSem = getViewingSemester();
+  const semCourses = curSem.id ? courses.filter(c => c.semester_id === curSem.id) : courses;
+  sel.innerHTML = semCourses.map(c => `<option value="${c.id}" ${c.id === a.course_id ? 'selected' : ''}>${c.code}</option>`).join('');
   document.getElementById('assignType').value = a.type || 'Assignment';
   openModal('modalAssignment');
 }
@@ -2108,20 +2124,24 @@ function editAssignment(id) {
 async function saveAssignment() {
   const id = document.getElementById('editAssignId').value;
   const isPF = document.getElementById('assignPassFail').checked;
+  const responsesRequired = parseInt(document.getElementById('assignResponsesRequired').value) || null;
   const data = {
     name: document.getElementById('assignName').value.trim(),
     course_id: document.getElementById('assignCourse').value,
     type: document.getElementById('assignType').value,
     due_date: document.getElementById('assignDue').value || null,
+    due_time: document.getElementById('assignDueTime').value || null,
     weight: isPF ? null : (parseFloat(document.getElementById('assignWeight').value) || null),
     points: isPF ? null : (parseFloat(document.getElementById('assignPoints').value) || null),
     pass_fail: isPF,
     optional: document.getElementById('assignOptional').checked,
+    is_important: document.getElementById('assignImportant').checked,
+    responses_required: responsesRequired,
     notes: document.getElementById('assignNotes').value.trim()
   };
   if (!data.name) { showToast('Assignment name required'); return; }
   if (id) { await sbPatch('assignments', id, data); Object.assign(assignments.find(a => a.id === id), data); }
-  else { const r = await sb('POST', 'assignments', { ...data, completed: false }); assignments.push(r[0]); }
+  else { const r = await sb('POST', 'assignments', { ...data, completed: false, responses_done: 0 }); assignments.push(r[0]); }
   closeModal('modalAssignment');
   renderAll();
   showToast('Saved!');
@@ -2165,10 +2185,6 @@ function inferReadingDueDate(courseId, weekLabel) {
   if (!matches.length) return null;
   // Return the latest (last) due date among matched assignments
   return matches.sort((a, b) => new Date(b.due_date) - new Date(a.due_date))[0].due_date;
-}
-
-function readingLinkIcon(url) {
-  return 'ti-cloud';
 }
 
 function renderReadings() {
@@ -2244,7 +2260,7 @@ function renderReadings() {
           <i class="ti ti-grip-vertical drag-handle" style="margin-top:4px"></i>
           <div class="check-circle ${rCheckClass}" onclick="toggleReading('${r.id}')" style="margin-top:2px"></div>
           <div class="reading-text">
-            <div class="reading-title">${r.title}${r.url ? ` <a href="${r.url}" target="_blank" style="font-size:11px;color:var(--garnet);margin-left:6px" title="${r.url}"><i class="ti ${readingLinkIcon(r.url)}"></i></a>` : ''}</div>
+            <div class="reading-title">${r.title}${r.url ? ` <a href="${r.url}" target="_blank" style="font-size:11px;color:var(--pink);margin-left:6px" title="${r.url}"><i class="ti ti-cloud"></i></a>` : ''}</div>
             ${r.citation ? `<div class="reading-citation">${r.citation}</div>` : ''}
           </div>
           <button class="btn btn-secondary btn-sm btn-icon" onclick="editReading('${r.id}')"><i class="ti ti-pencil"></i></button>
@@ -2275,7 +2291,7 @@ function renderReadings() {
         cRows += `<div class="reading-row" style="opacity:.55">
           <div class="check-circle done ${rCheckClass}" onclick="toggleReading('${r.id}')" style="margin-top:2px"></div>
           <div class="reading-text">
-            <div class="reading-title" style="text-decoration:line-through">${r.title}${r.url ? ` <a href="${r.url}" target="_blank" style="font-size:11px;color:var(--garnet);margin-left:6px;text-decoration:none" onclick="event.stopPropagation()" title="${r.url}"><i class="ti ${readingLinkIcon(r.url)}"></i></a>` : ''}</div>
+            <div class="reading-title" style="text-decoration:line-through">${r.title}${r.url ? ` <a href="${r.url}" target="_blank" style="font-size:11px;color:var(--pink);margin-left:6px;text-decoration:none" onclick="event.stopPropagation()" title="${r.url}"><i class="ti ti-cloud"></i></a>` : ''}</div>
             ${r.week_label ? `<div class="reading-citation">${r.week_label}</div>` : ''}
           </div>
           <button class="btn btn-secondary btn-sm btn-icon" onclick="editReading('${r.id}')"><i class="ti ti-pencil"></i></button>
@@ -2327,7 +2343,7 @@ function openAddReading() {
   document.getElementById('readUrl').value = '';
   document.getElementById('readModalTitle').textContent = 'Add Reading';
   document.getElementById('deleteReadBtn').style.display = 'none';
-  document.getElementById('readCourse').innerHTML = courses.map(c => `<option value="${c.id}">${c.code}</option>`).join('');
+  document.getElementById('readCourse').innerHTML = (getViewingSemester().id ? courses.filter(c => c.semester_id === getViewingSemester().id) : courses).map(c => `<option value="${c.id}">${c.code}</option>`).join('');
   openModal('modalReading');
 }
 
@@ -2341,7 +2357,7 @@ function editReading(id) {
   document.getElementById('readUrl').value = r.url || '';
   document.getElementById('readModalTitle').textContent = 'Edit Reading';
   document.getElementById('deleteReadBtn').style.display = 'inline-flex';
-  document.getElementById('readCourse').innerHTML = courses.map(c => `<option value="${c.id}" ${c.id === r.course_id ? 'selected' : ''}>${c.code}</option>`).join('');
+  document.getElementById('readCourse').innerHTML = (getViewingSemester().id ? courses.filter(c => c.semester_id === getViewingSemester().id) : courses).map(c => `<option value="${c.id}" ${c.id === r.course_id ? 'selected' : ''}>${c.code}</option>`).join('');
   openModal('modalReading');
 }
 
@@ -2418,7 +2434,7 @@ function renderTimeline() {
         ${w.deadlines.length ? w.deadlines.map(a => {
           const c = courseById(a.course_id);
           const dueTodayCls = isDueToday(a.due_date) ? ' due-today' : '';
-          return `<div class="week-dl-item${dueTodayCls}"><i class="ti ti-calendar-event"></i><span>${a.name} ${courseTag(c)} <em style="color:var(--text3);font-size:11px">${fmtDate(a.due_date)}</em></span></div>`;
+          return `<div class="week-dl-item${dueTodayCls}"><i class="ti ti-calendar-event"></i><span>${a.name} ${courseTag(c)} <em style="color:var(--text3);font-size:11px">${fmtDateTime(a.due_date, a.due_time)}</em></span></div>`;
         }).join('') : '<span style="font-size:12px;color:var(--text3)">No deadlines this week</span>'}
       </div>
     </div>`;
@@ -2563,7 +2579,7 @@ function renderGrades() {
       }
       return `<tr class="${isDueToday(a.due_date) ? 'due-today' : ''}">
         <td>${a.name}</td>
-        <td class="hide-mobile">${fmtDate(a.due_date)}</td>
+        <td class="hide-mobile">${fmtDateTime(a.due_date, a.due_time)}</td>
         <td>${colLabel}</td>
         <td>${inputCell}</td>
       </tr>`;
@@ -2764,7 +2780,7 @@ function openAssignmentNotes(assignmentId) {
   if (!a) return;
   document.getElementById('assignNotesModalTitle').textContent = a.name;
   const c = courseById(a.course_id);
-  document.getElementById('assignNotesModalSub').textContent = [c ? c.code : null, fmtDate(a.due_date)].filter(Boolean).join(' · ');
+  document.getElementById('assignNotesModalSub').textContent = [c ? c.code : null, fmtDateTime(a.due_date, a.due_time)].filter(Boolean).join(' · ');
   document.getElementById('assignNotesAddBtn').setAttribute('onclick', `openAddNote('${assignmentId}')`);
   document.getElementById('assignNotesEditBtn').setAttribute('onclick', `editAssignment('${assignmentId}')`);
   renderAssignmentNotesList(assignmentId);
@@ -3219,6 +3235,21 @@ async function deleteCourse() {
 }
 
 // ── EXPORT ───────────────────────────────────────
+function formatGradeDisplay(a) {
+  if (a.pass_fail) {
+    if (a.grade === 1) return 'Complete';
+    if (a.grade === 0) return 'Incomplete';
+    return '—';
+  }
+  if (a.points) {
+    return (a.grade || a.grade === 0) ? `${a.grade}/${a.points}` : '—';
+  }
+  if (a.weight) {
+    return (a.grade || a.grade === 0) ? `${a.grade}%` : '—';
+  }
+  return '—';
+}
+
 function renderExport() {
   const curSem = getViewingSemester();
   document.getElementById('exportTitle').textContent = curSem.name || 'Semester Summary';
@@ -3247,11 +3278,12 @@ function renderExport() {
     return `<div style="margin-bottom:20px">
       <div style="font-size:14px;font-weight:700;margin-bottom:8px;color:#782F40">${c.code} — ${c.name}</div>
       <table class="tbl">
-        <thead><tr><th>Assignment</th><th>Due</th><th>Status</th></tr></thead>
+        <thead><tr><th>Assignment</th><th>Due</th><th>Grade</th><th>Status</th></tr></thead>
         <tbody>
           ${cA.map(a => `<tr>
             <td>${a.name}</td>
-            <td>${a.due_date ? new Date(a.due_date+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'}) : '—'}</td>
+            <td>${fmtDateTime(a.due_date, a.due_time)}</td>
+            <td>${formatGradeDisplay(a)}</td>
             <td>${a.completed ? '<span class="tag tag-green"><i class="ti ti-check"></i> Done</span>' : '<span class="tag tag-gray">Pending</span>'}</td>
           </tr>`).join('')}
         </tbody>
@@ -3357,10 +3389,15 @@ function downloadExportPDF() {
       doc.setTextColor(...DARK);
       doc.setFont('helvetica', a.completed ? 'italic' : 'normal'); doc.setFontSize(9);
       const label = (a.completed ? '✓  ' : '   ') + a.name;
-      doc.text(label, margin + 5, y + 5.2, { maxWidth: contentW - 28 });
+      doc.text(label, margin + 5, y + 5.2, { maxWidth: contentW - 46 });
+      const gradeStr = formatGradeDisplay(a);
+      if (gradeStr !== '—') {
+        doc.setFont('helvetica', 'bold'); doc.setTextColor(...col); doc.setFontSize(8);
+        doc.text(gradeStr, pageW - margin - 22, y + 5.2, { align: 'right' });
+      }
       if (a.due_date) {
         doc.setFont('helvetica', 'normal'); doc.setTextColor(...GRAY); doc.setFontSize(8);
-        const ds = new Date(a.due_date + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        const ds = fmtDateTime(a.due_date, a.due_time);
         doc.text(ds, pageW - margin - 3, y + 5.2, { align: 'right' });
       }
       y += 8;
@@ -3496,7 +3533,9 @@ let importParsed = [];
 function openImportReadings() {
   // Populate course dropdown
   const sel = document.getElementById('importCourse');
-  sel.innerHTML = courses.map(c => `<option value="${c.id}">${c.code} — ${c.name}</option>`).join('');
+  const curSem = getViewingSemester();
+  const semCourses = curSem.id ? courses.filter(c => c.semester_id === curSem.id) : courses;
+  sel.innerHTML = semCourses.map(c => `<option value="${c.id}">${c.code} — ${c.name}</option>`).join('');
   // Reset to step 1
   document.getElementById('importText').value = '';
   document.getElementById('importWeekLabel').value = '';
@@ -3670,7 +3709,9 @@ let importAssignParsed = [];
 
 function openImportAssign() {
   const sel = document.getElementById('importAssignCourse');
-  sel.innerHTML = courses.map(c => `<option value="${c.id}">${c.code} — ${c.name}</option>`).join('');
+  const curSem = getViewingSemester();
+  const semCourses = curSem.id ? courses.filter(c => c.semester_id === curSem.id) : courses;
+  sel.innerHTML = semCourses.map(c => `<option value="${c.id}">${c.code} — ${c.name}</option>`).join('');
   document.getElementById('importAssignText').value = '';
   document.getElementById('importAssignStep1').style.display = 'block';
   document.getElementById('importAssignStep2').style.display = 'none';
@@ -3684,15 +3725,39 @@ function backToImportAssignStep1() {
 }
 
 function parseAssignImport() {
-  const raw = document.getElementById('importAssignText').value.trim();
+  let raw = document.getElementById('importAssignText').value.trim();
   if (!raw) { showToast('Paste some text first'); return; }
   const courseId = document.getElementById('importAssignCourse').value;
 
+  // iOS sometimes converts a copied link into Markdown format —
+  // [Assignment Title](https://...) — strip that down to just the
+  // visible title before anything else touches the text.
+  raw = raw.replace(/\[([^\]]+)\]\(https?:\/\/[^\)]+\)/g, '$1');
+
   // Canvas's Assignments page copy/paste is line-based: a name line,
   // followed shortly by a "Due <date>[ at <time>] | <weight>/<points> pts"
-  // line. Group lines into blocks, one per assignment, anchored on the
-  // "Due ..." line.
-  const lines = raw.split('\n').map(l => l.trim()).filter(Boolean);
+  // line. On iPad, copying rendered page content sometimes loses the line
+  // breaks entirely, pasting everything as one flattened run of text — so
+  // first, force line breaks back in before each "Due ..." and after each
+  // points figure, regardless of whether real newlines survived the paste.
+  let normalized = raw.replace(/([^\n])(\bDue\s+[A-Za-z]{3,9}\s+\d{1,2}\b)/gi, '$1\n$2');
+  normalized = normalized.replace(/(\d+(?:\.\d+)?\s*pts?)\b\.?\s*(?=\S)/gi, '$1\n');
+
+  // Canvas sometimes also splits a due line and its points onto two
+  // separate real lines (when a due TIME is included) — merge those back
+  // together, or the points-only line gets misread as a new assignment.
+  const rawLines = normalized.split('\n').map(l => l.trim()).filter(Boolean);
+  const lines = [];
+  for (const line of rawLines) {
+    const isPtsOnly = /^\|?\s*-?\/?\d+(\.\d+)?\s*pts?\.?$/i.test(line);
+    const prev = lines[lines.length - 1];
+    if (isPtsOnly && prev && /\bdue\b/i.test(prev) && !/\d+\s*pts?\b/i.test(prev)) {
+      lines[lines.length - 1] = prev + ' ' + line;
+    } else {
+      lines.push(line);
+    }
+  }
+
   const blocks = [];
   let current = [];
   for (const line of lines) {
@@ -3706,7 +3771,8 @@ function parseAssignImport() {
 
   importAssignParsed = blocks
     .map(block => parseAssignBlock(block, courseId))
-    .filter(a => a.name);
+    .filter(a => (a.name && a.name.trim()) || a.due_date || a.points || a.weight)
+    .map(a => (a.name && a.name.trim()) ? a : { ...a, name: '(untitled — click to edit)' });
 
   if (!importAssignParsed.length) { showToast('No assignments detected — try adjusting the text'); return; }
 
@@ -3726,7 +3792,7 @@ function parseAssignBlock(lines, courseId) {
   const full = lines.join(' ');
   // name = first line that isn't itself a "Due ..." line
   let name = lines.find(l => !/^due\b/i.test(l)) || lines[0] || '';
-  name = name.replace(/^[\s\-•·\*\d]+\.?\s*/, '').trim();
+  name = name.replace(/^([-•·*]\s+|\d+[.)]\s+)/, '').trim();
 
   let due_date = null;
   const dateMatch = full.match(/due\s+([A-Za-z]{3,9})\s+(\d{1,2})/i);
@@ -3750,13 +3816,24 @@ function parseAssignBlock(lines, courseId) {
   const weightMatch = full.match(/(\d+(?:\.\d+)?)\s*%/);
   if (weightMatch) weight = parseFloat(weightMatch[1]);
 
-  const type = /discussion/i.test(full) ? 'Discussion'
-    : /quiz/i.test(full) ? 'Quiz'
-    : /exam/i.test(full) ? 'Exam'
-    : /presentation/i.test(full) ? 'Presentation'
+  let due_time = null;
+  const timeMatch = full.match(/at\s+(\d{1,2}):(\d{2})\s*(am|pm)/i);
+  if (timeMatch) {
+    let h = parseInt(timeMatch[1], 10);
+    const m = timeMatch[2];
+    const ampm = timeMatch[3].toLowerCase();
+    if (ampm === 'pm' && h !== 12) h += 12;
+    if (ampm === 'am' && h === 12) h = 0;
+    due_time = `${String(h).padStart(2,'0')}:${m}`;
+  }
+
+  const type = /\bdiscussion\b/i.test(full) ? 'Discussion'
+    : /\bquiz\b/i.test(full) ? 'Quiz'
+    : /\bexam\b/i.test(full) ? 'Exam'
+    : /\bpresentation\b/i.test(full) ? 'Presentation'
     : 'Assignment';
 
-  return { name, due_date, points, weight, type, course_id: courseId, _raw: full };
+  return { name, due_date, due_time, points, weight, type, course_id: courseId, _raw: full };
 }
 
 function renderImportAssignPreview() {
@@ -3764,21 +3841,25 @@ function renderImportAssignPreview() {
   list.innerHTML = importAssignParsed.map((a, i) => `
     <div style="padding:12px 14px;border-bottom:1px solid var(--border);${i===importAssignParsed.length-1?'border-bottom:none':''}">
       <div style="display:flex;align-items:flex-start;gap:10px">
-        <input type="checkbox" ${a._checked ? 'checked' : ''} onchange="importAssignParsed[${i}]._checked=this.checked" style="margin-top:4px">
-        <div style="flex:1">
-          <input type="text" value="${escHtml(a.name)}" style="font-size:13px;font-weight:600;border:none;background:transparent;padding:0;width:100%;color:var(--text)"
-            oninput="importAssignParsed[${i}].name=this.value">
-          <div style="display:flex;gap:10px;align-items:center;margin-top:4px;flex-wrap:wrap">
-            <input type="date" value="${a.due_date || ''}" style="font-size:11px;border:1px solid var(--border);background:transparent;color:var(--text2);border-radius:4px;padding:2px 4px"
+        <input type="checkbox" ${a._checked ? 'checked' : ''} onchange="importAssignParsed[${i}]._checked=this.checked" style="width:auto;margin-top:4px">
+        <div style="flex:1;min-width:0">
+          <textarea rows="1" style="font-size:13px;font-weight:600;border:none;background:transparent;padding:0;width:100%;min-height:19px;color:var(--text);resize:vertical;overflow:hidden;word-break:break-word;font-family:inherit;line-height:1.4"
+            oninput="importAssignParsed[${i}].name=this.value; this.style.height='auto'; this.style.height=this.scrollHeight+'px';"
+            onfocus="this.style.height='auto'; this.style.height=this.scrollHeight+'px';">${escHtml(a.name)}</textarea>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:6px">
+            <input type="date" value="${a.due_date || ''}" style="font-size:11px;border:1px solid var(--border);background:transparent;color:var(--text2);border-radius:4px;padding:4px 6px;width:100%"
               onchange="importAssignParsed[${i}].due_date=this.value">
-            <input type="number" placeholder="pts" value="${a.points ?? ''}" style="width:60px;font-size:11px;border:1px solid var(--border);background:transparent;color:var(--text2);border-radius:4px;padding:2px 4px"
+            <input type="time" value="${a.due_time || ''}" style="font-size:11px;border:1px solid var(--border);background:transparent;color:var(--text2);border-radius:4px;padding:4px 6px;width:100%"
+              onchange="importAssignParsed[${i}].due_time=this.value">
+            <input type="number" placeholder="pts" value="${a.points ?? ''}" style="font-size:11px;border:1px solid var(--border);background:transparent;color:var(--text2);border-radius:4px;padding:4px 6px;width:100%"
               onchange="importAssignParsed[${i}].points=parseFloat(this.value)||null">
-            <span class="tag tag-gray" style="font-size:10px">${escHtml(a.type)}</span>
+            <span class="tag tag-gray" style="font-size:10px;display:flex;align-items:center;justify-content:center">${escHtml(a.type)}</span>
           </div>
         </div>
       </div>
     </div>
   `).join('') || '<div style="text-align:center;padding:20px;color:var(--text3)">Nothing to review</div>';
+  list.querySelectorAll('textarea').forEach(t => { t.style.height = 'auto'; t.style.height = t.scrollHeight + 'px'; });
 }
 
 async function confirmAssignImport() {
@@ -3803,10 +3884,7 @@ async function confirmAssignImport() {
   SB_URL = localStorage.getItem('sb_url') || '';
   SB_KEY = localStorage.getItem('sb_key') || '';
   if (SB_URL && SB_KEY) {
-    launch().catch(e => {
-      console.error(e);
-      showToast('Something went wrong loading your data — try Disconnect / Re-enter Setup in the menu');
-    });
+    launch();
   } else {
     document.getElementById('setupScreen').style.display = 'flex';
     initDark();
