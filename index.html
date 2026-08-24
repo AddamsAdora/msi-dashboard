@@ -3734,6 +3734,13 @@ function parseAssignImport() {
   // visible title before anything else touches the text.
   raw = raw.replace(/\[([^\]]+)\]\(https?:\/\/[^\)]+\)/g, '$1');
 
+  // Canvas appends a boilerplate submission-status phrase after the points
+  // figure, sometimes with NO space before it ("40 ptsNo submission for
+  // this assignment. 40 points possible.") — strip it entirely before
+  // anything else runs, since it carries no information we don't already
+  // have, and its lack of a space defeats the word-boundary split below.
+  raw = raw.replace(/(?:no submission for this assignment|not submitted|this assignment doesn't have a submission)\.?\s*\d+(?:\.\d+)?\s*points?\s*possible\.?/gi, '');
+
   // Canvas's Assignments page copy/paste is line-based: a name line,
   // followed shortly by a "Due <date>[ at <time>] | <weight>/<points> pts"
   // line. On iPad, copying rendered page content sometimes loses the line
@@ -3788,10 +3795,29 @@ function parseAssignImport() {
   document.getElementById('importAssignStep2').style.display = 'block';
 }
 
+const ASSIGN_TYPE_LABELS = {
+  'discussion topic': 'Discussion', 'discussion': 'Discussion',
+  'assignment': 'Assignment', 'quiz': 'Quiz', 'exam': 'Exam',
+  'project': 'Project', 'presentation': 'Presentation'
+};
+
 function parseAssignBlock(lines, courseId) {
-  const full = lines.join(' ');
+  // Canvas sometimes puts the assignment TYPE on its own leading line
+  // ("Discussion Topic", "Quiz", etc.) before the actual title — if so,
+  // pull it out and use it directly, rather than letting it become the name.
+  let workingLines = lines;
+  let labelType = null;
+  if (lines.length > 1) {
+    const firstLower = lines[0].toLowerCase().trim();
+    if (ASSIGN_TYPE_LABELS[firstLower]) {
+      labelType = ASSIGN_TYPE_LABELS[firstLower];
+      workingLines = lines.slice(1);
+    }
+  }
+
+  const full = workingLines.join(' ');
   // name = first line that isn't itself a "Due ..." line
-  let name = lines.find(l => !/^due\b/i.test(l)) || lines[0] || '';
+  let name = workingLines.find(l => !/^due\b/i.test(l)) || workingLines[0] || '';
   name = name.replace(/^([-•·*]\s+|\d+[.)]\s+)/, '').trim();
 
   let due_date = null;
@@ -3827,13 +3853,18 @@ function parseAssignBlock(lines, courseId) {
     due_time = `${String(h).padStart(2,'0')}:${m}`;
   }
 
-  const type = /\bdiscussion\b/i.test(full) ? 'Discussion'
+  const type = labelType || (/\bdiscussion\b/i.test(full) ? 'Discussion'
     : /\bquiz\b/i.test(full) ? 'Quiz'
     : /\bexam\b/i.test(full) ? 'Exam'
     : /\bpresentation\b/i.test(full) ? 'Presentation'
-    : 'Assignment';
+    : 'Assignment');
 
-  return { name, due_date, due_time, points, weight, type, course_id: courseId, _raw: full };
+  // No points at all, or explicitly 0, and no weight either — these are
+  // effectively pass/fail items (did you do it or not), not graded on a
+  // point scale. Default to pass/fail; easy to uncheck in the preview.
+  const pass_fail = (points === null || points === 0) && weight === null;
+
+  return { name, due_date, due_time, points, weight, type, pass_fail, course_id: courseId, _raw: full };
 }
 
 function renderImportAssignPreview() {
@@ -3851,10 +3882,14 @@ function renderImportAssignPreview() {
               onchange="importAssignParsed[${i}].due_date=this.value">
             <input type="time" value="${a.due_time || ''}" style="font-size:11px;border:1px solid var(--border);background:transparent;color:var(--text2);border-radius:4px;padding:4px 6px;width:100%"
               onchange="importAssignParsed[${i}].due_time=this.value">
-            <input type="number" placeholder="pts" value="${a.points ?? ''}" style="font-size:11px;border:1px solid var(--border);background:transparent;color:var(--text2);border-radius:4px;padding:4px 6px;width:100%"
+            <input type="number" placeholder="pts" value="${a.points ?? ''}" style="font-size:11px;border:1px solid var(--border);background:transparent;color:var(--text2);border-radius:4px;padding:4px 6px;width:100%" ${a.pass_fail ? 'disabled' : ''}
               onchange="importAssignParsed[${i}].points=parseFloat(this.value)||null">
             <span class="tag tag-gray" style="font-size:10px;display:flex;align-items:center;justify-content:center">${escHtml(a.type)}</span>
           </div>
+          <label style="display:flex;align-items:center;gap:6px;margin-top:6px;font-size:11px;color:var(--text2);cursor:pointer">
+            <input type="checkbox" ${a.pass_fail ? 'checked' : ''} style="width:auto" onchange="importAssignParsed[${i}].pass_fail=this.checked; renderImportAssignPreview();">
+            Pass/Fail (no points or %)${a.pass_fail ? ' — no points found, defaulted on' : ''}
+          </label>
         </div>
       </div>
     </div>
@@ -3868,6 +3903,7 @@ async function confirmAssignImport() {
   let added = 0;
   for (const a of chosen) {
     const { _checked, _raw, ...rest } = a;
+    if (rest.pass_fail) { rest.points = null; rest.weight = null; }
     const result = await sb('POST', 'assignments', { ...rest, notes: '', completed: false });
     assignments.push(result[0]);
     added++;
